@@ -1,0 +1,17 @@
+# Automatically normalize line endings
+* text=auto
+
+# Normalize to LF in Git
+*.java     text
+*.kt       text
+*.xml      text
+*.gradle   text
+*.json     text
+*.js       text
+*.ts       text
+*.html     text
+*.css      text
+*.md       text
+*.yml      text
+*.yaml     text
+*.txt      text
