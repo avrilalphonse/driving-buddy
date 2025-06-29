@@ -1,4 +1,4 @@
-package com.example.drivingbuddy;
+package com.drivingbuddy;
 
 import android.os.Bundle;
 

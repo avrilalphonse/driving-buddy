@@ -1,4 +1,4 @@
-package com.example.drivingbuddy;
+package com.drivingbuddy;
 
 import org.junit.Test;
 
