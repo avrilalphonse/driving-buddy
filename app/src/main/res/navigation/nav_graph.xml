@@ -2,7 +2,7 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/homeFragment">
+    app:startDestination="@id/loginFragment">
 
     <fragment
         android:id="@+id/homeFragment"
@@ -24,4 +24,21 @@
         android:name="com.drivingbuddy.SettingsFragment"
         android:label="Settings" />
 
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.drivingbuddy.LoginFragment"
+        android:label="Log In">
+        <action
+            android:id="@+id/action_loginFragment_to_signupFragment"
+            app:destination="@id/signupFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/signupFragment"
+        android:name="com.drivingbuddy.SignupFragment"
+        android:label="Sign Up" >
+        <action
+            android:id="@+id/action_signupFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+    </fragment>
 </navigation>
