@@ -11,11 +11,11 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.appbar.MaterialToolbar;
+import android.view.View;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
-
     private NavController navController;
 
     @Override
@@ -33,20 +33,27 @@ public class MainActivity extends AppCompatActivity {
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Find NavHostFragment from the layout
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.nav_host_fragment);
 
-        if (navHostFragment != null) {
-            navController = navHostFragment.getNavController();
-        }
-
-        // Find BottomNavigationView from layout
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_nav);
 
-        // Link BottomNavigationView with NavController
-        if (navController != null && bottomNavigationView != null) {
-            NavigationUI.setupWithNavController(bottomNavigationView, navController);
+        if (navHostFragment != null) {
+            navController = navHostFragment.getNavController();
+
+            if (bottomNavigationView != null) {
+                NavigationUI.setupWithNavController(bottomNavigationView, navController);
+            }
+
+            navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+                if (destination.getId() == R.id.loginFragment || destination.getId() == R.id.signupFragment) {
+                    bottomNavigationView.setVisibility(View.GONE);
+                    toolbar.setVisibility(View.VISIBLE);
+                } else {
+                    bottomNavigationView.setVisibility(View.VISIBLE);
+                    toolbar.setVisibility(View.VISIBLE);
+                }
+            });
         }
     }
 }
