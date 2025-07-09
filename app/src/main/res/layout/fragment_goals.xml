@@ -171,6 +171,15 @@
                     android:layout_height="wrap_content"
                     android:text="Detailed summary or insight about goal 1 goes here."
                     android:textSize="14sp" />
+
+                <ProgressBar
+                    android:id="@+id/goal_progress_1"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:progress="0"
+                    android:max="100" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
@@ -203,6 +212,15 @@
                     android:layout_height="wrap_content"
                     android:text="Detailed summary or insight about goal 2 goes here."
                     android:textSize="14sp" />
+
+                <ProgressBar
+                    android:id="@+id/goal_progress_2"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:progress="0"
+                    android:max="100" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
@@ -235,6 +253,15 @@
                     android:layout_height="wrap_content"
                     android:text="Detailed summary or insight about goal 3 goes here."
                     android:textSize="14sp" />
+
+                <ProgressBar
+                    android:id="@+id/goal_progress_3"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:progress="0"
+                    android:max="100" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 

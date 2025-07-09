@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -41,6 +42,7 @@ public class GoalsFragment extends Fragment {
     private List<CardView> goalCards;
     private List<CardView> goalDetails;
     private List<String> currentGoals = new ArrayList<>();
+    private List<Integer> goalProgress = new ArrayList<>();
     private final int MAX_GOALS = 3;
 
     private Context context;
@@ -119,6 +121,7 @@ public class GoalsFragment extends Fragment {
             deleteGoalButtons.get(i).setOnClickListener(v -> {
                 if (index < currentGoals.size()) {
                     currentGoals.remove(index);
+                    goalProgress.remove(index);
                     updateUI();
                     TextView messageView = view.findViewById(R.id.message_view);
                     messageView.setText(""); // clear any error messages on delete
@@ -130,6 +133,7 @@ public class GoalsFragment extends Fragment {
             String selectedGoal = goalSpinner.getSelectedItem().toString();
             TextView messageView = view.findViewById(R.id.message_view);
             if (currentGoals.size() < MAX_GOALS && !currentGoals.contains(selectedGoal)) {
+                goalProgress.add(0); // initial progress
                 currentGoals.add(selectedGoal);
                 updateUI();
                 // clear message
@@ -144,30 +148,38 @@ public class GoalsFragment extends Fragment {
     }
 
     private void updateUI() {
-            // Hide all main cards and details first
-            for (CardView card : goalCards) card.setVisibility(View.GONE);
-            for (CardView detail : goalDetails) detail.setVisibility(View.GONE);
+        // Hide all main cards and details first
+        for (CardView card : goalCards) card.setVisibility(View.GONE);
+        for (CardView detail : goalDetails) detail.setVisibility(View.GONE);
 
-            // Show based on currentGoals
-            for (int i = 0; i < currentGoals.size(); i++) {
-                CardView card = goalCards.get(i);
-                CardView detail = goalDetails.get(i);
+        // Show based on currentGoals
+        CardView detail = null;
+        for (int i = 0; i < currentGoals.size(); i++) {
+            CardView card = goalCards.get(i);
+            detail = goalDetails.get(i);
 
-                card.setVisibility(View.VISIBLE);
-                detail.setVisibility(View.VISIBLE);
+            card.setVisibility(View.VISIBLE);
+            detail.setVisibility(View.VISIBLE);
 
-                // Set main card text
-                TextView cardText = goalCardTexts.get(i);
-                cardText.setText(currentGoals.get(i));
+            // Set main card text
+            TextView cardText = goalCardTexts.get(i);
+            cardText.setText(currentGoals.get(i));
 
-                // Set detail title and body
-                TextView detailTitle = detail.findViewById(getResources().getIdentifier("goal_detail_title_" + (i + 1), "id", context.getPackageName()));
-                TextView detailBody = detail.findViewById(getResources().getIdentifier("goal_detail_body_" + (i + 1), "id", context.getPackageName()));
+            // Set detail title and body
+            TextView detailTitle = detail.findViewById(getResources().getIdentifier("goal_detail_title_" + (i + 1), "id", context.getPackageName()));
+            TextView detailBody = detail.findViewById(getResources().getIdentifier("goal_detail_body_" + (i + 1), "id", context.getPackageName()));
 
-                detailTitle.setText(currentGoals.get(i));
-                detailBody.setText("Detailed summary for " + currentGoals.get(i));
-            }
+            detailTitle.setText(currentGoals.get(i));
+            detailBody.setText("Detailed summary for " + currentGoals.get(i));
 
-            addGoalButton.setEnabled(currentGoals.size() < MAX_GOALS);
+            ProgressBar progressBar = detail.findViewById(
+                    getResources().getIdentifier("goal_progress_" + (i + 1), "id", context.getPackageName())
+            );
+            progressBar.setProgress(goalProgress.get(i)); // You can make this dynamic based on goal completion
+
+        }
+
+
+        addGoalButton.setEnabled(currentGoals.size() < MAX_GOALS);
     }
 }
