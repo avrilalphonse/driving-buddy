@@ -3,6 +3,7 @@ package com.drivingbuddy;
 import android.content.Context;
 import android.os.Bundle;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
@@ -120,12 +121,23 @@ public class GoalsFragment extends Fragment {
             final int index = i;
             deleteGoalButtons.get(i).setOnClickListener(v -> {
                 if (index < currentGoals.size()) {
-                    currentGoals.remove(index);
-                    goalProgress.remove(index);
-                    updateUI();
-                    TextView messageView = view.findViewById(R.id.message_view);
-                    messageView.setText(""); // clear any error messages on delete
+                    String goalName = currentGoals.get(index);
+                    int progress = goalProgress.get(index);
+
+                    new AlertDialog.Builder(context)
+                            .setTitle("Delete Goal")
+                            .setMessage("Are you sure you want to delete goal \"" + goalName + "\"? You have " + progress + "% progress!")
+                            .setPositiveButton("Delete", (dialog, which) -> {
+                                currentGoals.remove(index);
+                                goalProgress.remove(index);
+                                updateUI();
+                                TextView messageView = view.findViewById(R.id.message_view);
+                                messageView.setText(""); // clear any error messages on delete
+                            })
+                            .setNegativeButton("Cancel", null)
+                            .show();
                 }
+
             });
         }
 
@@ -133,8 +145,8 @@ public class GoalsFragment extends Fragment {
             String selectedGoal = goalSpinner.getSelectedItem().toString();
             TextView messageView = view.findViewById(R.id.message_view);
             if (currentGoals.size() < MAX_GOALS && !currentGoals.contains(selectedGoal)) {
-                goalProgress.add(0); // initial progress
                 currentGoals.add(selectedGoal);
+                goalProgress.add(0); // initial progress
                 updateUI();
                 // clear message
                 messageView.setText("");
