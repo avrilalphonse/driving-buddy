@@ -36,6 +36,8 @@ public class GoalsFragment extends Fragment {
 
     private Spinner goalSpinner;
     private Button addGoalButton;
+    private List<Button> deleteGoalButtons;
+    private List<TextView> goalCardTexts;
     private List<CardView> goalCards;
     private List<CardView> goalDetails;
     private List<String> currentGoals = new ArrayList<>();
@@ -97,7 +99,32 @@ public class GoalsFragment extends Fragment {
                 view.findViewById(R.id.goal_card_detail_3)
         );
 
+        goalCardTexts = Arrays.asList(
+                view.findViewById(R.id.goal_card_text_1),
+                view.findViewById(R.id.goal_card_text_2),
+                view.findViewById(R.id.goal_card_text_3)
+        );
+
+        deleteGoalButtons = Arrays.asList(
+                view.findViewById(R.id.delete_goal_1),
+                view.findViewById(R.id.delete_goal_2),
+                view.findViewById(R.id.delete_goal_3)
+        );
+
         updateUI();
+
+        // Set delete listeners
+        for (int i = 0; i < deleteGoalButtons.size(); i++) {
+            final int index = i;
+            deleteGoalButtons.get(i).setOnClickListener(v -> {
+                if (index < currentGoals.size()) {
+                    currentGoals.remove(index);
+                    updateUI();
+                    TextView messageView = view.findViewById(R.id.message_view);
+                    messageView.setText(""); // clear any error messages on delete
+                }
+            });
+        }
 
         addGoalButton.setOnClickListener(v -> {
             String selectedGoal = goalSpinner.getSelectedItem().toString();
@@ -117,32 +144,30 @@ public class GoalsFragment extends Fragment {
     }
 
     private void updateUI() {
-        // First hide all cards
-        for (CardView card : goalCards) card.setVisibility(View.GONE);
-        for (CardView detail : goalDetails) detail.setVisibility(View.GONE);
+            // Hide all main cards and details first
+            for (CardView card : goalCards) card.setVisibility(View.GONE);
+            for (CardView detail : goalDetails) detail.setVisibility(View.GONE);
 
-        // Then show what's needed
-        for (int i = 0; i < currentGoals.size(); i++) {
-            CardView card = goalCards.get(i);
-            CardView detail = goalDetails.get(i);
+            // Show based on currentGoals
+            for (int i = 0; i < currentGoals.size(); i++) {
+                CardView card = goalCards.get(i);
+                CardView detail = goalDetails.get(i);
 
-            card.setVisibility(View.VISIBLE);
-            detail.setVisibility(View.VISIBLE);
+                card.setVisibility(View.VISIBLE);
+                detail.setVisibility(View.VISIBLE);
 
-            // Set card text
-            TextView cardText = (TextView) card.getChildAt(0);
-            cardText.setText(currentGoals.get(i));
+                // Set main card text
+                TextView cardText = goalCardTexts.get(i);
+                cardText.setText(currentGoals.get(i));
 
-            // Set detail title
-            LinearLayout detailLayout = (LinearLayout) detail.getChildAt(0);
-            TextView detailTitle = (TextView) detailLayout.getChildAt(0);
-            detailTitle.setText(currentGoals.get(i));
+                // Set detail title and body
+                TextView detailTitle = detail.findViewById(getResources().getIdentifier("goal_detail_title_" + (i + 1), "id", context.getPackageName()));
+                TextView detailBody = detail.findViewById(getResources().getIdentifier("goal_detail_body_" + (i + 1), "id", context.getPackageName()));
 
-            // Set detail content (customize if needed)
-            TextView detailBody = (TextView) detailLayout.getChildAt(1);
-            detailBody.setText("Detailed summary for " + currentGoals.get(i));
-        }
+                detailTitle.setText(currentGoals.get(i));
+                detailBody.setText("Detailed summary for " + currentGoals.get(i));
+            }
 
-        addGoalButton.setEnabled(currentGoals.size() < MAX_GOALS);
+            addGoalButton.setEnabled(currentGoals.size() < MAX_GOALS);
     }
 }
