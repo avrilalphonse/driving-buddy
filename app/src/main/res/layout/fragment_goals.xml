@@ -17,97 +17,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/goals_title"
-            android:padding="12dp"
-            android:textSize="24sp" />
+            android:textColor="#333331"
+            android:textStyle="bold"
+            android:padding="8dp"
+            android:textSize="26sp" />
 
         <!-- Goal Cards (3 max) -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/goal_card_1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:padding="16dp">
+        <include layout="@layout/goal_card_template" />
+        <include layout="@layout/goal_card_template" />
+        <include layout="@layout/goal_card_template" />
 
-                <TextView
-                    android:id="@+id/goal_card_text_1"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="Goal 1"
-                    android:textSize="18sp" />
-
-                <Button
-                    android:id="@+id/delete_goal_1"
-                    android:layout_width="48dp"
-                    android:layout_height="wrap_content"
-                    android:text="x"
-                    android:padding="4dp"/>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/goal_card_2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:id="@+id/goal_card_text_2"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="Goal 2"
-                    android:textSize="18sp" />
-
-                <Button
-                    android:id="@+id/delete_goal_2"
-                    android:layout_width="48dp"
-                    android:layout_height="wrap_content"
-                    android:text="x"
-                    android:padding="6dp"/>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/goal_card_3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:id="@+id/goal_card_text_3"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="Goal 3"
-                    android:textSize="18sp" />
-
-                <Button
-                    android:id="@+id/delete_goal_3"
-                    android:layout_width="48dp"
-                    android:layout_height="wrap_content"
-                    android:text="x"
-                    android:padding="8dp"/>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
+        <!-- goal section/overview -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -120,8 +40,9 @@
             <Spinner
                 android:id="@+id/goal_spinner"
                 android:layout_width="0dp"
-                android:layout_weight="1.25"
                 android:layout_height="wrap_content"
+                android:layout_weight="1.25"
+                android:backgroundTint="#6E8374"
                 android:entries="@array/goal_options" />
 
             <Button
@@ -130,141 +51,166 @@
                 android:layout_weight="0.75"
                 android:layout_height="wrap_content"
                 android:text="Add Goal"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#115655"
                 android:layout_marginStart="8dp" />
         </LinearLayout>
 
+        <!-- what is this box for? -->
         <TextView
             android:id="@+id/message_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@android:color/holo_red_dark"
+            android:textColor="E6A4A4"
             android:textSize="14sp"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
-            android:visibility="visible"/>
+            android:visibility="gone"/>
 
-        <!-- Goal Overview: Goal 1 -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/goal_card_detail_1"
+<!--        &lt;!&ndash; Goal Overview: Goal 1 &ndash;&gt;-->
+<!--        <androidx.cardview.widget.CardView-->
+<!--            android:id="@+id/goal_card_detail_1"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginBottom="12dp"-->
+<!--            android:elevation="2dp">-->
+
+<!--            <LinearLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:orientation="vertical"-->
+<!--                android:padding="16dp">-->
+
+<!--                <TextView-->
+<!--                    android:id="@+id/goal_detail_title_1"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="Goal 1"-->
+<!--                    android:textStyle="bold"-->
+<!--                    android:textSize="18sp"-->
+<!--                    android:paddingBottom="8dp" />-->
+
+<!--                <TextView-->
+<!--                    android:id="@+id/goal_detail_body_1"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="Detailed summary or insight about goal 1 goes here."-->
+<!--                    android:textSize="14sp" />-->
+
+<!--                <ProgressBar-->
+<!--                    android:id="@+id/goal_progress_1"-->
+<!--                    style="?android:attr/progressBarStyleHorizontal"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginTop="8dp"-->
+<!--                    android:progress="0"-->
+<!--                    android:max="100" />-->
+<!--            </LinearLayout>-->
+<!--        </androidx.cardview.widget.CardView>-->
+
+<!--        &lt;!&ndash; Goal Overview: Goal 2 &ndash;&gt;-->
+<!--        <androidx.cardview.widget.CardView-->
+<!--            android:id="@+id/goal_card_detail_2"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginBottom="12dp"-->
+<!--            android:elevation="2dp">-->
+
+<!--            <LinearLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:orientation="vertical"-->
+<!--                android:padding="16dp">-->
+
+<!--                <TextView-->
+<!--                    android:id="@+id/goal_detail_title_2"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="Goal 2"-->
+<!--                    android:textStyle="bold"-->
+<!--                    android:textSize="18sp"-->
+<!--                    android:paddingBottom="8dp" />-->
+
+<!--                <TextView-->
+<!--                    android:id="@+id/goal_detail_body_2"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="Detailed summary or insight about goal 2 goes here."-->
+<!--                    android:textSize="14sp" />-->
+
+<!--                <ProgressBar-->
+<!--                    android:id="@+id/goal_progress_2"-->
+<!--                    style="?android:attr/progressBarStyleHorizontal"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginTop="8dp"-->
+<!--                    android:progress="0"-->
+<!--                    android:max="100" />-->
+<!--            </LinearLayout>-->
+<!--        </androidx.cardview.widget.CardView>-->
+
+<!--        &lt;!&ndash; Goal Overview: Goal 3 &ndash;&gt;-->
+<!--        <androidx.cardview.widget.CardView-->
+<!--            android:id="@+id/goal_card_detail_3"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginBottom="12dp"-->
+<!--            android:elevation="2dp">-->
+
+<!--            <LinearLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:orientation="vertical"-->
+<!--                android:padding="16dp">-->
+
+<!--                <TextView-->
+<!--                    android:id="@+id/goal_detail_title_3"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="Goal 3"-->
+<!--                    android:textStyle="bold"-->
+<!--                    android:textSize="18sp"-->
+<!--                    android:paddingBottom="8dp" />-->
+
+<!--                <TextView-->
+<!--                    android:id="@+id/goal_detail_body_3"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="Detailed summary or insight about goal 3 goes here."-->
+<!--                    android:textSize="14sp" />-->
+
+<!--                <ProgressBar-->
+<!--                    android:id="@+id/goal_progress_3"-->
+<!--                    style="?android:attr/progressBarStyleHorizontal"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginTop="8dp"-->
+<!--                    android:progress="0"-->
+<!--                    android:max="100" />-->
+<!--            </LinearLayout>-->
+<!--        </androidx.cardview.widget.CardView>-->
+    <!-- trophy section if needed? -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:elevation="2dp">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingTop="24dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_trophy"
+                android:contentDescription="Achievements"
+                android:tint="@color/black"/>
+
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:id="@+id/goal_detail_title_1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Goal 1"
-                    android:textStyle="bold"
-                    android:textSize="18sp"
-                    android:paddingBottom="8dp" />
-
-                <TextView
-                    android:id="@+id/goal_detail_body_1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Detailed summary or insight about goal 1 goes here."
-                    android:textSize="14sp" />
-
-                <ProgressBar
-                    android:id="@+id/goal_progress_1"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:progress="0"
-                    android:max="100" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- Goal Overview: Goal 2 -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/goal_card_detail_2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:elevation="2dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:id="@+id/goal_detail_title_2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Goal 2"
-                    android:textStyle="bold"
-                    android:textSize="18sp"
-                    android:paddingBottom="8dp" />
-
-                <TextView
-                    android:id="@+id/goal_detail_body_2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Detailed summary or insight about goal 2 goes here."
-                    android:textSize="14sp" />
-
-                <ProgressBar
-                    android:id="@+id/goal_progress_2"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:progress="0"
-                    android:max="100" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- Goal Overview: Goal 3 -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/goal_card_detail_3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:elevation="2dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:id="@+id/goal_detail_title_3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Goal 3"
-                    android:textStyle="bold"
-                    android:textSize="18sp"
-                    android:paddingBottom="8dp" />
-
-                <TextView
-                    android:id="@+id/goal_detail_body_3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Detailed summary or insight about goal 3 goes here."
-                    android:textSize="14sp" />
-
-                <ProgressBar
-                    android:id="@+id/goal_progress_3"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:progress="0"
-                    android:max="100" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
+                android:text="Check out your past achievements!"
+                android:textColor="#555552"
+                android:textSize="16sp"
+                android:layout_marginStart="12dp"/>
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>
