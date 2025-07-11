@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F6F4EF"
+    android:background="?android:colorBackground"
     tools:context="com.drivingbuddy.GoalsFragment">
 
     <LinearLayout
@@ -16,179 +17,37 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/goals_title"
-            android:textColor="#333331"
+            android:text="Goals"
+            android:textColor="?attr/colorOnBackground"
             android:textStyle="bold"
             android:padding="8dp"
             android:textSize="26sp" />
 
-        <!-- Goal Cards (3 max) -->
-        <include layout="@layout/goal_card_template" />
-        <include layout="@layout/goal_card_template" />
-        <include layout="@layout/goal_card_template" />
-
-        <!-- goal section/overview -->
-        <LinearLayout
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/goal_dropdown_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginTop="24dp"
             android:layout_marginBottom="16dp"
-            android:weightSum="2">
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
 
-            <Spinner
-                android:id="@+id/goal_spinner"
-                android:layout_width="0dp"
+            <AutoCompleteTextView
+                android:id="@+id/goal_dropdown"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1.25"
-                android:backgroundTint="#6E8374"
-                android:entries="@array/goal_options" />
+                android:backgroundTint="@color/inactive"
+                android:hint="Select a Goal"
+                android:inputType="none"
+                android:textColor="?attr/colorOnBackground"
+                android:textColorHint="@color/inactive" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-            <Button
-                android:id="@+id/add_goal_button"
-                android:layout_width="0dp"
-                android:layout_weight="0.75"
-                android:layout_height="wrap_content"
-                android:text="Add Goal"
-                android:textColor="#FFFFFF"
-                android:backgroundTint="#115655"
-                android:layout_marginStart="8dp" />
-        </LinearLayout>
-
-        <!-- what is this box for? -->
-        <TextView
-            android:id="@+id/message_view"
+        <!-- dynamic goal card test -->
+        <LinearLayout
+            android:id="@+id/goal_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="E6A4A4"
-            android:textSize="14sp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:visibility="gone"/>
+            android:orientation="vertical" />
 
-<!--        &lt;!&ndash; Goal Overview: Goal 1 &ndash;&gt;-->
-<!--        <androidx.cardview.widget.CardView-->
-<!--            android:id="@+id/goal_card_detail_1"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginBottom="12dp"-->
-<!--            android:elevation="2dp">-->
-
-<!--            <LinearLayout-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:orientation="vertical"-->
-<!--                android:padding="16dp">-->
-
-<!--                <TextView-->
-<!--                    android:id="@+id/goal_detail_title_1"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="Goal 1"-->
-<!--                    android:textStyle="bold"-->
-<!--                    android:textSize="18sp"-->
-<!--                    android:paddingBottom="8dp" />-->
-
-<!--                <TextView-->
-<!--                    android:id="@+id/goal_detail_body_1"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="Detailed summary or insight about goal 1 goes here."-->
-<!--                    android:textSize="14sp" />-->
-
-<!--                <ProgressBar-->
-<!--                    android:id="@+id/goal_progress_1"-->
-<!--                    style="?android:attr/progressBarStyleHorizontal"-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_marginTop="8dp"-->
-<!--                    android:progress="0"-->
-<!--                    android:max="100" />-->
-<!--            </LinearLayout>-->
-<!--        </androidx.cardview.widget.CardView>-->
-
-<!--        &lt;!&ndash; Goal Overview: Goal 2 &ndash;&gt;-->
-<!--        <androidx.cardview.widget.CardView-->
-<!--            android:id="@+id/goal_card_detail_2"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginBottom="12dp"-->
-<!--            android:elevation="2dp">-->
-
-<!--            <LinearLayout-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:orientation="vertical"-->
-<!--                android:padding="16dp">-->
-
-<!--                <TextView-->
-<!--                    android:id="@+id/goal_detail_title_2"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="Goal 2"-->
-<!--                    android:textStyle="bold"-->
-<!--                    android:textSize="18sp"-->
-<!--                    android:paddingBottom="8dp" />-->
-
-<!--                <TextView-->
-<!--                    android:id="@+id/goal_detail_body_2"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="Detailed summary or insight about goal 2 goes here."-->
-<!--                    android:textSize="14sp" />-->
-
-<!--                <ProgressBar-->
-<!--                    android:id="@+id/goal_progress_2"-->
-<!--                    style="?android:attr/progressBarStyleHorizontal"-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_marginTop="8dp"-->
-<!--                    android:progress="0"-->
-<!--                    android:max="100" />-->
-<!--            </LinearLayout>-->
-<!--        </androidx.cardview.widget.CardView>-->
-
-<!--        &lt;!&ndash; Goal Overview: Goal 3 &ndash;&gt;-->
-<!--        <androidx.cardview.widget.CardView-->
-<!--            android:id="@+id/goal_card_detail_3"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginBottom="12dp"-->
-<!--            android:elevation="2dp">-->
-
-<!--            <LinearLayout-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:orientation="vertical"-->
-<!--                android:padding="16dp">-->
-
-<!--                <TextView-->
-<!--                    android:id="@+id/goal_detail_title_3"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="Goal 3"-->
-<!--                    android:textStyle="bold"-->
-<!--                    android:textSize="18sp"-->
-<!--                    android:paddingBottom="8dp" />-->
-
-<!--                <TextView-->
-<!--                    android:id="@+id/goal_detail_body_3"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="Detailed summary or insight about goal 3 goes here."-->
-<!--                    android:textSize="14sp" />-->
-
-<!--                <ProgressBar-->
-<!--                    android:id="@+id/goal_progress_3"-->
-<!--                    style="?android:attr/progressBarStyleHorizontal"-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_marginTop="8dp"-->
-<!--                    android:progress="0"-->
-<!--                    android:max="100" />-->
-<!--            </LinearLayout>-->
-<!--        </androidx.cardview.widget.CardView>-->
     <!-- trophy section if needed? -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -201,14 +60,15 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:src="@drawable/ic_trophy"
+                app:tint="@color/onSurface"
                 android:contentDescription="Achievements"
-                android:tint="@color/black"/>
+                />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Check out your past achievements!"
-                android:textColor="#555552"
+                android:textColor="@color/onSurface"
                 android:textSize="16sp"
                 android:layout_marginStart="12dp"/>
         </LinearLayout>
