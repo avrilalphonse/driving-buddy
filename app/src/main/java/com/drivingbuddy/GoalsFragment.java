@@ -1,197 +1,185 @@
 package com.drivingbuddy;
 
-import android.content.Context;
+import android.annotation.SuppressLint;
 import android.os.Bundle;
-
-import androidx.appcompat.app.AlertDialog;
-import androidx.cardview.widget.CardView;
-import androidx.fragment.app.Fragment;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AutoCompleteTextView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import java.util.ArrayList;
+import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
+import androidx.fragment.app.Fragment;
+
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link GoalsFragment#newInstance} factory method to
- * create an instance of this fragment.
- *
- */
 public class GoalsFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private AutoCompleteTextView goalDropdown;
+    private LinearLayout goalContainer;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private final List<String> allGoals = Arrays.asList(
+            "Reduce sudden braking",
+            "Reduce sharp turns",
+            "Reduce inconsistent speeds",
+            "Reduce lane deviation"
+    );
 
-    private Spinner goalSpinner;
-    private Button addGoalButton;
-    private List<Button> deleteGoalButtons;
-    private List<TextView> goalCardTexts;
-    private List<CardView> goalCards;
-    private List<CardView> goalDetails;
-    private List<String> currentGoals = new ArrayList<>();
-    private List<Integer> goalProgress = new ArrayList<>();
-    private final int MAX_GOALS = 3;
-
-    private Context context;
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment GoalsFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static GoalsFragment newInstance(String param1, String param2) {
-        GoalsFragment fragment = new GoalsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    public GoalsFragment() {
-        // Required empty public constructor
-    }
+    private final Map<String, Integer> dummyProgressData = new HashMap<>();
+    private final Map<String, List<String>> dummyTipsData = new HashMap<>();
+    private final Set<String> addedGoals = new HashSet<>();
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_goals, container, false);
+        View root = inflater.inflate(R.layout.fragment_goals, container, false);
 
-        context = requireContext();
+        goalDropdown = root.findViewById(R.id.goal_dropdown);
+        goalContainer = root.findViewById(R.id.goal_container);
 
-        // UI elements
-        goalSpinner = view.findViewById(R.id.goal_spinner);
-        addGoalButton = view.findViewById(R.id.add_goal_button);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_dropdown_item_1line, allGoals);
+        goalDropdown.setAdapter(adapter);
 
-        goalCards = Arrays.asList(
-                view.findViewById(R.id.goal_card_1),
-                view.findViewById(R.id.goal_card_2),
-                view.findViewById(R.id.goal_card_3)
-        );
-
-        goalDetails = Arrays.asList(
-                view.findViewById(R.id.goal_card_detail_1),
-                view.findViewById(R.id.goal_card_detail_2),
-                view.findViewById(R.id.goal_card_detail_3)
-        );
-
-        goalCardTexts = Arrays.asList(
-                view.findViewById(R.id.goal_card_text_1),
-                view.findViewById(R.id.goal_card_text_2),
-                view.findViewById(R.id.goal_card_text_3)
-        );
-
-        deleteGoalButtons = Arrays.asList(
-                view.findViewById(R.id.delete_goal_1),
-                view.findViewById(R.id.delete_goal_2),
-                view.findViewById(R.id.delete_goal_3)
-        );
-
-        updateUI();
-
-        // Set delete listeners
-        for (int i = 0; i < deleteGoalButtons.size(); i++) {
-            final int index = i;
-            deleteGoalButtons.get(i).setOnClickListener(v -> {
-                if (index < currentGoals.size()) {
-                    String goalName = currentGoals.get(index);
-                    int progress = goalProgress.get(index);
-
-                    new AlertDialog.Builder(context)
-                            .setTitle("Delete Goal")
-                            .setMessage("Are you sure you want to delete goal \"" + goalName + "\"? You have " + progress + "% progress!")
-                            .setPositiveButton("Delete", (dialog, which) -> {
-                                currentGoals.remove(index);
-                                goalProgress.remove(index);
-                                updateUI();
-                                TextView messageView = view.findViewById(R.id.message_view);
-                                messageView.setText(""); // clear any error messages on delete
-                            })
-                            .setNegativeButton("Cancel", null)
-                            .show();
-                }
-
-            });
-        }
-
-        addGoalButton.setOnClickListener(v -> {
-            String selectedGoal = goalSpinner.getSelectedItem().toString();
-            TextView messageView = view.findViewById(R.id.message_view);
-            if (currentGoals.size() < MAX_GOALS && !currentGoals.contains(selectedGoal)) {
-                currentGoals.add(selectedGoal);
-                goalProgress.add(0); // initial progress
-                updateUI();
-                // clear message
-                messageView.setText("");
-            }
-            else {
-                // Show error message
-                messageView.setText("You can only add up to " + MAX_GOALS + " unique goals.");
-            }
+        goalDropdown.setOnItemClickListener((parent, view, position, id) -> {
+            String selectedGoal = adapter.getItem(position);
+            addGoal(inflater, selectedGoal);
+            goalDropdown.setText(""); // reset
         });
-        return view;
+
+        generateDummyData();
+
+        return root;
     }
 
-    private void updateUI() {
-        // Hide all main cards and details first
-        for (CardView card : goalCards) card.setVisibility(View.GONE);
-        for (CardView detail : goalDetails) detail.setVisibility(View.GONE);
+    private void generateDummyData() {
+        dummyProgressData.put("Reduce sudden braking", 45);
+        dummyProgressData.put("Reduce sharp turns", 70);
+        dummyProgressData.put("Reduce inconsistent speeds", 30);
+        dummyProgressData.put("Reduce lane deviation", 60);
 
-        // Show based on currentGoals
-        CardView detail = null;
-        for (int i = 0; i < currentGoals.size(); i++) {
-            CardView card = goalCards.get(i);
-            detail = goalDetails.get(i);
+        dummyTipsData.put("Reduce sudden braking", Arrays.asList(
+                "Ease into the brake",
+                "Brake in advance",
+                "Maintain safe distance"
+        ));
+        dummyTipsData.put("Reduce sharp turns", Arrays.asList(
+                "Slow down before turning",
+                "Keep both hands on wheel",
+                "Avoid jerky steering movements"
+        ));
+        dummyTipsData.put("Reduce inconsistent speeds", Arrays.asList(
+                "Use cruise control where possible",
+                "Anticipate traffic flow",
+                "Keep steady pressure on gas pedal"
+        ));
+        dummyTipsData.put("Reduce lane deviation", Arrays.asList(
+                "Focus on lane markings",
+                "Avoid distractions",
+                "Use gentle steering corrections"
+        ));
+    }
 
-            card.setVisibility(View.VISIBLE);
-            detail.setVisibility(View.VISIBLE);
+    private void toggleExpandableSection(View expandableSection) {
+        if (expandableSection.getVisibility() == View.GONE) {
+            expandableSection.setVisibility(View.VISIBLE);
+            expandableSection.setAlpha(0f);
+            expandableSection.setScaleY(0f);
+            expandableSection.animate()
+                    .alpha(1f)
+                    .scaleY(1f)
+                    .setDuration(200)
+                    .start();
+        } else {
+            expandableSection.animate()
+                    .alpha(0f)
+                    .scaleY(0f)
+                    .setDuration(200)
+                    .withEndAction(() -> expandableSection.setVisibility(View.GONE))
+                    .start();
+        }
+    }
 
-            // Set main card text
-            TextView cardText = goalCardTexts.get(i);
-            cardText.setText(currentGoals.get(i));
-
-            // Set detail title and body
-            TextView detailTitle = detail.findViewById(getResources().getIdentifier("goal_detail_title_" + (i + 1), "id", context.getPackageName()));
-            TextView detailBody = detail.findViewById(getResources().getIdentifier("goal_detail_body_" + (i + 1), "id", context.getPackageName()));
-
-            detailTitle.setText(currentGoals.get(i));
-            detailBody.setText("Detailed summary for " + currentGoals.get(i));
-
-            ProgressBar progressBar = detail.findViewById(
-                    getResources().getIdentifier("goal_progress_" + (i + 1), "id", context.getPackageName())
-            );
-            progressBar.setProgress(goalProgress.get(i)); // You can make this dynamic based on goal completion
-
+    @SuppressLint("ClickableViewAccessibility")
+    private void addGoal(LayoutInflater inflater, String goalTitle) {
+        if (addedGoals.contains(goalTitle)) {
+            Toast.makeText(getContext(), "Goal already added", Toast.LENGTH_SHORT).show();
+            return;
         }
 
+        View goalCardRoot = inflater.inflate(R.layout.goal_card_template, goalContainer, false);
+        CardView goalCard = goalCardRoot.findViewById(R.id.goal_card);
+        ImageButton deleteButton = goalCardRoot.findViewById(R.id.delete_goal);
+        LinearLayout expandableSection = goalCardRoot.findViewById(R.id.goal_expandable_section);
+        TextView titleView = goalCardRoot.findViewById(R.id.goal_card_text);
+        ProgressBar progressBar = goalCardRoot.findViewById(R.id.goal_progress);
+        TextView progressPercent = goalCardRoot.findViewById(R.id.goal_progress_percent);
 
-        addGoalButton.setEnabled(currentGoals.size() < MAX_GOALS);
+        int progress = dummyProgressData.getOrDefault(goalTitle, 0);
+        titleView.setText(goalTitle);
+        progressBar.setProgress(progress);
+        progressPercent.setText("Progress: " + progress + "%");
+
+        List<String> tips = dummyTipsData.get(goalTitle);
+        if (tips != null && tips.size() >= 3) {
+            TextView tip1 = goalCardRoot.findViewById(R.id.goal_tip_1);
+            TextView tip2 = goalCardRoot.findViewById(R.id.goal_tip_2);
+            TextView tip3 = goalCardRoot.findViewById(R.id.goal_tip_3);
+
+            tip1.setText("• " + tips.get(0));
+            tip2.setText("• " + tips.get(1));
+            tip3.setText("• " + tips.get(2));
+        }
+
+        goalCard.setOnClickListener(v -> toggleExpandableSection(expandableSection));
+
+        final float[] downX = new float[1];
+        goalCard.setOnTouchListener((v, event) -> {
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    downX[0] = event.getX();
+                    return true;
+                case MotionEvent.ACTION_MOVE:
+                    float deltaX = event.getX() - downX[0];
+                    if (Math.abs(deltaX) > 50) {
+                        goalCard.setTranslationX(deltaX);
+                        deleteButton.setVisibility(View.VISIBLE);
+                    }
+                    return true;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    if (goalCard.getTranslationX() < -150) {
+                        deleteButton.setVisibility(View.VISIBLE);
+                    } else {
+                        goalCard.animate().translationX(0).setDuration(200);
+                        deleteButton.setVisibility(View.GONE);
+                    }
+                    return true;
+            }
+            return false;
+        });
+
+        deleteButton.setOnClickListener(v -> {
+            goalContainer.removeView(goalCardRoot);
+            addedGoals.remove(goalTitle);
+        });
+
+        goalContainer.addView(goalCardRoot);
+        addedGoals.add(goalTitle);
     }
+
 }

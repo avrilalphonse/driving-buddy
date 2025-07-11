@@ -1,8 +1,29 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
     <style name="Base.Theme.DrivingBuddy" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:fontFamily">@font/my_font</item>
+        <!-- Primary brand color -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryVariant">@color/primaryVariant</item>
+        <item name="colorOnPrimary">@color/onPrimary</item>
+
+        <!-- Secondary brand color -->
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorSecondaryVariant">@color/secondaryVariant</item>
+        <item name="colorOnSecondary">@color/onSecondary</item>
+
+        <!-- Background and surface -->
+        <item name="android:colorBackground">@color/background</item>
+<!--        <<item name="colorBackground">@color/background</item>-->
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/onSurface</item>
+
+        <!-- Text colors -->
+        <item name="android:textColorPrimary">@color/onBackground</item>
+        <item name="android:textColorSecondary">@color/onSurface</item>
+
+        <!-- Default button style -->
+        <item name="buttonStyle">@style/Widget.MaterialComponents.Button</item>
+        <item name="buttonTint">@color/primary</item>
     </style>
 
     <style name="Theme.DrivingBuddy" parent="Base.Theme.DrivingBuddy" />
