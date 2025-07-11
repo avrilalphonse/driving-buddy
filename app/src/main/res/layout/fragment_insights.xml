@@ -164,7 +164,7 @@
                 android:layout_height="wrap_content"
                 android:text="Summary"
                 android:padding="16dp"
-                android:textSize="14sp"
+                android:textSize="16sp"
                 android:textColor="?attr/colorOnBackground"
                 android:textStyle="bold" />
             <TextView
