@@ -1,5 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="primary">#115655</color>
+    <color name="primaryVariant">#0E4545</color>
+    <color name="secondary">#E6A4A4</color>
+    <color name="secondaryVariant">#D28F8F</color>
+    <color name="background">#F6F4EF</color>
+    <color name="surface">#D9D4CC</color>
+    <color name="onPrimary">#FFFFFF</color>
+    <color name="onSecondary">#FFFFFF</color>
+    <color name="onBackground">#333331</color>
+    <color name="onSurface">#555552</color>
+    <color name="accent">#C6D7D1</color>
+    <color name="inactive">#6E8374</color>
 </resources>
