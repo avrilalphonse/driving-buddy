@@ -123,8 +123,8 @@ public class GoalsFragment extends Fragment {
 
         View goalCardRoot = inflater.inflate(R.layout.goal_card_template, goalContainer, false);
         CardView goalCard = goalCardRoot.findViewById(R.id.goal_card);
-        ImageButton deleteButton = goalCardRoot.findViewById(R.id.delete_goal);
         LinearLayout expandableSection = goalCardRoot.findViewById(R.id.goal_expandable_section);
+        ImageButton deleteButton = goalCardRoot.findViewById(R.id.delete_goal);
         TextView titleView = goalCardRoot.findViewById(R.id.goal_card_text);
         ProgressBar progressBar = goalCardRoot.findViewById(R.id.goal_progress);
         TextView progressPercent = goalCardRoot.findViewById(R.id.goal_progress_percent);
@@ -145,28 +145,46 @@ public class GoalsFragment extends Fragment {
             tip3.setText("• " + tips.get(2));
         }
 
-        goalCard.setOnClickListener(v -> toggleExpandableSection(expandableSection));
+        final float[] startX = {0};
+        final long[] startTime = {0};
+        final boolean[] isSwiping = {false};
 
-        final float[] downX = new float[1];
         goalCard.setOnTouchListener((v, event) -> {
-            switch (event.getActionMasked()) {
+            switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    downX[0] = event.getX();
+                    startX[0] = event.getX();
+                    startTime[0] = System.currentTimeMillis();
+                    isSwiping[0] = false;
                     return true;
+
                 case MotionEvent.ACTION_MOVE:
-                    float deltaX = event.getX() - downX[0];
-                    if (Math.abs(deltaX) > 50) {
-                        goalCard.setTranslationX(deltaX);
+                    float deltaX = event.getX() - startX[0];
+                    if (Math.abs(deltaX) > 20) {
+                        isSwiping[0] = true;
+                    }
+                    if (deltaX < 0) {  // left swipe only
+                        v.setTranslationX(deltaX);
                         deleteButton.setVisibility(View.VISIBLE);
                     }
                     return true;
+
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
-                    if (goalCard.getTranslationX() < -150) {
+                    float totalDelta = event.getX() - startX[0];
+                    long duration = System.currentTimeMillis() - startTime[0];
+
+                    if (!isSwiping[0] && Math.abs(totalDelta) < 20 && duration < 200) {
+                        // tap
+                        toggleExpandableSection(expandableSection);
+                        return true;
+                    }
+
+                    if (Math.abs(totalDelta) > v.getWidth() * 0.3f) {
+                        v.animate().translationX(-deleteButton.getWidth()).setDuration(200).start();
                         deleteButton.setVisibility(View.VISIBLE);
                     } else {
-                        goalCard.animate().translationX(0).setDuration(200);
-                        deleteButton.setVisibility(View.GONE);
+                        v.animate().translationX(0).setDuration(200).start();
+                        deleteButton.setVisibility(View.INVISIBLE);
                     }
                     return true;
             }
@@ -174,12 +192,23 @@ public class GoalsFragment extends Fragment {
         });
 
         deleteButton.setOnClickListener(v -> {
-            goalContainer.removeView(goalCardRoot);
-            addedGoals.remove(goalTitle);
+            new android.app.AlertDialog.Builder(requireContext())
+                    .setTitle("Delete Goal")
+                    .setMessage("Are you sure you want to delete this goal?")
+                    .setPositiveButton("Delete", (dialog, which) -> {
+                        goalContainer.removeView(goalCardRoot);
+                        addedGoals.remove(goalTitle);
+                    })
+                    .setNegativeButton("Cancel", (dialog, which) -> {
+                        goalCard.animate().translationX(0).setDuration(200).start();
+                        deleteButton.setVisibility(View.INVISIBLE);
+                    })
+                    .show();
         });
 
         goalContainer.addView(goalCardRoot);
         addedGoals.add(goalTitle);
     }
+
 
 }

@@ -12,7 +12,7 @@
         android:src="@drawable/ic_delete"
         android:contentDescription="Delete Goal"
         app:tint="@android:color/white"
-        android:visibility="gone"
+        android:visibility="invisible"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
