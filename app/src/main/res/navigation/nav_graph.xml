@@ -26,7 +26,7 @@
 
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.drivingbuddy.LoginFragment"
+        android:name="com.drivingbuddy.ui.LoginFragment"
         android:label="Log In">
         <action
             android:id="@+id/action_loginFragment_to_signupFragment"
@@ -35,7 +35,7 @@
 
     <fragment
         android:id="@+id/signupFragment"
-        android:name="com.drivingbuddy.SignupFragment"
+        android:name="com.drivingbuddy.ui.SignupFragment"
         android:label="Sign Up" >
         <action
             android:id="@+id/action_signupFragment_to_loginFragment"
