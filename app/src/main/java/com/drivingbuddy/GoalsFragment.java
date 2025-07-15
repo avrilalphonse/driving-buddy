@@ -145,17 +145,15 @@ public class GoalsFragment extends Fragment {
             tip3.setText("• " + tips.get(2));
         }
 
-        // Expandable on click
-        goalCard.setOnClickListener(v -> toggleExpandableSection(expandableSection));
-
-        // Swipe-to-delete logic
         final float[] startX = {0};
+        final long[] startTime = {0};
         final boolean[] isSwiping = {false};
 
         goalCard.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     startX[0] = event.getX();
+                    startTime[0] = System.currentTimeMillis();
                     isSwiping[0] = false;
                     return true;
 
@@ -164,49 +162,53 @@ public class GoalsFragment extends Fragment {
                     if (Math.abs(deltaX) > 20) {
                         isSwiping[0] = true;
                     }
-                    if (isSwiping[0]) {
+                    if (deltaX < 0) {  // left swipe only
                         v.setTranslationX(deltaX);
-                        float alpha = 1 - Math.min(1f, Math.abs(deltaX) / v.getWidth());
-                        v.setAlpha(alpha);
+                        deleteButton.setVisibility(View.VISIBLE);
                     }
                     return true;
 
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
                     float totalDelta = event.getX() - startX[0];
-                    if (isSwiping[0] && Math.abs(totalDelta) > v.getWidth() * 0.4f) {
-                        v.animate()
-                                .translationX(totalDelta > 0 ? v.getWidth() : -v.getWidth())
-                                .alpha(0f)
-                                .setDuration(200)
-                                .withEndAction(() -> {
-                                    goalContainer.removeView(goalCardRoot);
-                                    addedGoals.remove(goalTitle);
-                                }).start();
-                    } else {
-                        // Reset position
-                        v.animate().translationX(0).alpha(1f).setDuration(200).start();
+                    long duration = System.currentTimeMillis() - startTime[0];
 
-                        // Not swiped — treat like tap
-                        if (!isSwiping[0]) {
-                            toggleExpandableSection(expandableSection);
-                        }
+                    if (!isSwiping[0] && Math.abs(totalDelta) < 20 && duration < 200) {
+                        // tap
+                        toggleExpandableSection(expandableSection);
+                        return true;
+                    }
+
+                    if (Math.abs(totalDelta) > v.getWidth() * 0.3f) {
+                        v.animate().translationX(-deleteButton.getWidth()).setDuration(200).start();
+                        deleteButton.setVisibility(View.VISIBLE);
+                    } else {
+                        v.animate().translationX(0).setDuration(200).start();
+                        deleteButton.setVisibility(View.INVISIBLE);
                     }
                     return true;
             }
             return false;
         });
 
-        // Fallback delete button
         deleteButton.setOnClickListener(v -> {
-            goalContainer.removeView(goalCardRoot);
-            addedGoals.remove(goalTitle);
+            new android.app.AlertDialog.Builder(requireContext())
+                    .setTitle("Delete Goal")
+                    .setMessage("Are you sure you want to delete this goal?")
+                    .setPositiveButton("Delete", (dialog, which) -> {
+                        goalContainer.removeView(goalCardRoot);
+                        addedGoals.remove(goalTitle);
+                    })
+                    .setNegativeButton("Cancel", (dialog, which) -> {
+                        goalCard.animate().translationX(0).setDuration(200).start();
+                        deleteButton.setVisibility(View.INVISIBLE);
+                    })
+                    .show();
         });
 
         goalContainer.addView(goalCardRoot);
         addedGoals.add(goalTitle);
     }
-
 
 
 }
