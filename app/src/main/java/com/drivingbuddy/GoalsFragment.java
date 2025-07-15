@@ -123,8 +123,8 @@ public class GoalsFragment extends Fragment {
 
         View goalCardRoot = inflater.inflate(R.layout.goal_card_template, goalContainer, false);
         CardView goalCard = goalCardRoot.findViewById(R.id.goal_card);
-        ImageButton deleteButton = goalCardRoot.findViewById(R.id.delete_goal);
         LinearLayout expandableSection = goalCardRoot.findViewById(R.id.goal_expandable_section);
+        ImageButton deleteButton = goalCardRoot.findViewById(R.id.delete_goal);
         TextView titleView = goalCardRoot.findViewById(R.id.goal_card_text);
         ProgressBar progressBar = goalCardRoot.findViewById(R.id.goal_progress);
         TextView progressPercent = goalCardRoot.findViewById(R.id.goal_progress_percent);
@@ -145,34 +145,59 @@ public class GoalsFragment extends Fragment {
             tip3.setText("• " + tips.get(2));
         }
 
+        // Expandable on click
         goalCard.setOnClickListener(v -> toggleExpandableSection(expandableSection));
 
-        final float[] downX = new float[1];
+        // Swipe-to-delete logic
+        final float[] startX = {0};
+        final boolean[] isSwiping = {false};
+
         goalCard.setOnTouchListener((v, event) -> {
-            switch (event.getActionMasked()) {
+            switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    downX[0] = event.getX();
+                    startX[0] = event.getX();
+                    isSwiping[0] = false;
                     return true;
+
                 case MotionEvent.ACTION_MOVE:
-                    float deltaX = event.getX() - downX[0];
-                    if (Math.abs(deltaX) > 50) {
-                        goalCard.setTranslationX(deltaX);
-                        deleteButton.setVisibility(View.VISIBLE);
+                    float deltaX = event.getX() - startX[0];
+                    if (Math.abs(deltaX) > 20) {
+                        isSwiping[0] = true;
+                    }
+                    if (isSwiping[0]) {
+                        v.setTranslationX(deltaX);
+                        float alpha = 1 - Math.min(1f, Math.abs(deltaX) / v.getWidth());
+                        v.setAlpha(alpha);
                     }
                     return true;
+
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
-                    if (goalCard.getTranslationX() < -150) {
-                        deleteButton.setVisibility(View.VISIBLE);
+                    float totalDelta = event.getX() - startX[0];
+                    if (isSwiping[0] && Math.abs(totalDelta) > v.getWidth() * 0.4f) {
+                        v.animate()
+                                .translationX(totalDelta > 0 ? v.getWidth() : -v.getWidth())
+                                .alpha(0f)
+                                .setDuration(200)
+                                .withEndAction(() -> {
+                                    goalContainer.removeView(goalCardRoot);
+                                    addedGoals.remove(goalTitle);
+                                }).start();
                     } else {
-                        goalCard.animate().translationX(0).setDuration(200);
-                        deleteButton.setVisibility(View.GONE);
+                        // Reset position
+                        v.animate().translationX(0).alpha(1f).setDuration(200).start();
+
+                        // Not swiped — treat like tap
+                        if (!isSwiping[0]) {
+                            toggleExpandableSection(expandableSection);
+                        }
                     }
                     return true;
             }
             return false;
         });
 
+        // Fallback delete button
         deleteButton.setOnClickListener(v -> {
             goalContainer.removeView(goalCardRoot);
             addedGoals.remove(goalTitle);
@@ -181,5 +206,7 @@ public class GoalsFragment extends Fragment {
         goalContainer.addView(goalCardRoot);
         addedGoals.add(goalTitle);
     }
+
+
 
 }
