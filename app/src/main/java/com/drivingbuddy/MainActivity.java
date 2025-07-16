@@ -56,4 +56,9 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
+
+    public void logout() {
+        // necessary logout logic can be put here
+        navController.navigate(R.id.loginFragment);
+    }
 }
