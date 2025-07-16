@@ -15,3 +15,11 @@ app.use('/api/auth', authRoutes);
 server.listen(config.port, () => {
   console.log(`Server running on port ${config.port}`);
 });
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+   console.error(`Port ${config.port} is already in use. Terminate its running process or use a different port.`);
+  } else {
+    console.error('Server startup error:', err);
+  }
+});
