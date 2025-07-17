@@ -10,5 +10,7 @@
         <item>No sharp turning</item>
         <item>Consistent Speeds</item>
     </string-array>
+    <string name="heading_left">D R I V I N G</string>
+    <string name="heading_right">B U D D Y</string>
 
 </resources>
