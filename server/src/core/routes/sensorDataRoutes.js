@@ -1,6 +1,6 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { importCsvToMongoDB, classifySensorData } = require('../controllers/sensorDataController');
+import { importCsvToMongoDB } from '../controllers/sensorDataController.js';
 
 // Example: POST /api/sensor-data/import
 router.post('/import', async (req, res) => {
@@ -12,14 +12,4 @@ router.post('/import', async (req, res) => {
   }
 });
 
-// Example: POST /api/sensor-data/classify
-router.post('/classify', async (req, res) => {
-  try {
-    await classifySensorData();
-    res.send('Data classified');
-  } catch (err) {
-    res.status(500).send(err.message);
-  }
-});
-
-module.exports = router;
+export default router;

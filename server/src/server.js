@@ -3,6 +3,7 @@ import { createServer } from 'http';
 import connectDB from './config/db.js';
 import config from './config/index.js';
 import authRoutes from './core/routes/authRoutes.js';
+import sensorDataRoutes from './core/routes/sensorDataRoutes.js';
 
 const app = express();
 const server = createServer(app);
@@ -11,6 +12,7 @@ app.use(express.json());
 connectDB();
 
 app.use('/api/auth', authRoutes);
+app.use('/api/sensor-data', sensorDataRoutes);
 
 server.listen(config.port, () => {
   console.log(`Server running on port ${config.port}`);
@@ -18,7 +20,7 @@ server.listen(config.port, () => {
 
 server.on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
-   console.error(`Port ${config.port} is already in use. Terminate its running process or use a different port.`);
+    console.error(`Port ${config.port} is already in use. Terminate its running process or use a different port.`);
   } else {
     console.error('Server startup error:', err);
   }
