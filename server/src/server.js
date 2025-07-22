@@ -3,7 +3,11 @@ import { createServer } from 'http';
 import connectDB from './config/db.js';
 import config from './config/index.js';
 import authRoutes from './core/routes/authRoutes.js';
+<<<<<<< Updated upstream
 import sensorDataRoutes from './core/routes/sensorDataRoutes.js';
+=======
+import goalRoutes from './core/routes/goalRoutes.js';
+>>>>>>> Stashed changes
 
 const app = express();
 const server = createServer(app);
@@ -11,8 +15,13 @@ const server = createServer(app);
 app.use(express.json());
 connectDB();
 
+// Paths
 app.use('/api/auth', authRoutes);
+<<<<<<< Updated upstream
 app.use('/api/sensor-data', sensorDataRoutes);
+=======
+app.use('/api/goals', goalRoutes);
+>>>>>>> Stashed changes
 
 server.listen(config.port, () => {
   console.log(`Server running on port ${config.port}`);

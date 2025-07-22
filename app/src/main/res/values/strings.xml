@@ -1,16 +1,19 @@
 <resources>
+
     <string name="app_name">Driving Buddy</string>
+    <string name="heading_left">D R I V I N G</string>
+    <string name="heading_right">B U D D Y</string>
+
     <string name="home_title">Home</string>
     <string name="insights_title">Insights</string>
     <string name="goals_title">Goals</string>
     <string name="settings_title">Settings</string>
+
     <string-array name="goal_options">
         <item>Better lane changes</item>
         <item>No hard brakes</item>
         <item>No sharp turning</item>
         <item>Consistent Speeds</item>
     </string-array>
-    <string name="heading_left">D R I V I N G</string>
-    <string name="heading_right">B U D D Y</string>
 
 </resources>

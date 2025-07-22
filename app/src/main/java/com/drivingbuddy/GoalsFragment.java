@@ -2,14 +2,12 @@ package com.drivingbuddy;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -27,10 +25,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import androidx.lifecycle.ViewModelProvider;
+import com.drivingbuddy.data.model.Goal;
+import com.drivingbuddy.ui.goals.GoalViewModel;
+import java.util.ArrayList;
+
 public class GoalsFragment extends Fragment {
 
     private AutoCompleteTextView goalDropdown;
     private LinearLayout goalContainer;
+    private GoalViewModel goalViewModel;
+    private ArrayAdapter<String> adapter;
 
     private final List<String> allGoals = Arrays.asList(
             "Reduce sudden braking",
@@ -38,9 +43,6 @@ public class GoalsFragment extends Fragment {
             "Reduce inconsistent speeds",
             "Reduce lane deviation"
     );
-
-    private final Map<String, Integer> dummyProgressData = new HashMap<>();
-    private final Map<String, List<String>> dummyTipsData = new HashMap<>();
     private final Set<String> addedGoals = new HashSet<>();
 
     @Override
@@ -51,47 +53,48 @@ public class GoalsFragment extends Fragment {
         goalDropdown = root.findViewById(R.id.goal_dropdown);
         goalContainer = root.findViewById(R.id.goal_container);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_dropdown_item_1line, allGoals);
+        adapter = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_dropdown_item_1line, new ArrayList<>(allGoals));
         goalDropdown.setAdapter(adapter);
+
+        goalViewModel = new ViewModelProvider(this).get(GoalViewModel.class);
+        goalViewModel.getGoals().observe(getViewLifecycleOwner(), goals -> {
+            goalContainer.removeAllViews();
+            addedGoals.clear();
+            adapter.clear();
+            adapter.addAll(allGoals);
+            
+            if (goals != null) {
+                for (Goal goal : goals) {
+                    addGoalCard(inflater, goal);
+                    addedGoals.add(goal.getTitle());
+                    adapter.remove(goal.getTitle());
+                }
+                adapter.notifyDataSetChanged();
+            }
+        });
 
         goalDropdown.setOnItemClickListener((parent, view, position, id) -> {
             String selectedGoal = adapter.getItem(position);
-            addGoal(inflater, selectedGoal);
+
+            goalViewModel.createGoal(selectedGoal).observe(getViewLifecycleOwner(), goal -> {
+                if (goal != null) {
+                    Toast.makeText(getContext(), "Goal added!", Toast.LENGTH_SHORT).show();
+                    
+                    addGoalCard(getLayoutInflater(), goal);
+                    addedGoals.add(goal.getTitle());
+                    adapter.remove(selectedGoal);
+                    adapter.notifyDataSetChanged();
+
+                } else {
+                    Toast.makeText(getContext(), "Failed to add goal", Toast.LENGTH_SHORT).show();
+                }
+            });
+
             goalDropdown.setText(""); // reset
         });
 
-        generateDummyData();
-
         return root;
-    }
-
-    private void generateDummyData() {
-        dummyProgressData.put("Reduce sudden braking", 45);
-        dummyProgressData.put("Reduce sharp turns", 70);
-        dummyProgressData.put("Reduce inconsistent speeds", 30);
-        dummyProgressData.put("Reduce lane deviation", 60);
-
-        dummyTipsData.put("Reduce sudden braking", Arrays.asList(
-                "Ease into the brake",
-                "Brake in advance",
-                "Maintain safe distance"
-        ));
-        dummyTipsData.put("Reduce sharp turns", Arrays.asList(
-                "Slow down before turning",
-                "Keep both hands on wheel",
-                "Avoid jerky steering movements"
-        ));
-        dummyTipsData.put("Reduce inconsistent speeds", Arrays.asList(
-                "Use cruise control where possible",
-                "Anticipate traffic flow",
-                "Keep steady pressure on gas pedal"
-        ));
-        dummyTipsData.put("Reduce lane deviation", Arrays.asList(
-                "Focus on lane markings",
-                "Avoid distractions",
-                "Use gentle steering corrections"
-        ));
     }
 
     private void toggleExpandableSection(View expandableSection) {
@@ -115,8 +118,8 @@ public class GoalsFragment extends Fragment {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private void addGoal(LayoutInflater inflater, String goalTitle) {
-        if (addedGoals.contains(goalTitle)) {
+    private void addGoalCard(LayoutInflater inflater, Goal goal) {
+        if (addedGoals.contains(goal.getTitle())) {
             Toast.makeText(getContext(), "Goal already added", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -129,12 +132,12 @@ public class GoalsFragment extends Fragment {
         ProgressBar progressBar = goalCardRoot.findViewById(R.id.goal_progress);
         TextView progressPercent = goalCardRoot.findViewById(R.id.goal_progress_percent);
 
-        int progress = dummyProgressData.getOrDefault(goalTitle, 0);
-        titleView.setText(goalTitle);
+        int progress = goal.getProgress();
+        titleView.setText(goal.getTitle());
         progressBar.setProgress(progress);
         progressPercent.setText("Progress: " + progress + "%");
 
-        List<String> tips = dummyTipsData.get(goalTitle);
+        List<String> tips = goal.getTips();
         if (tips != null && tips.size() >= 3) {
             TextView tip1 = goalCardRoot.findViewById(R.id.goal_tip_1);
             TextView tip2 = goalCardRoot.findViewById(R.id.goal_tip_2);
@@ -196,8 +199,19 @@ public class GoalsFragment extends Fragment {
                     .setTitle("Delete Goal")
                     .setMessage("Are you sure you want to delete this goal?")
                     .setPositiveButton("Delete", (dialog, which) -> {
-                        goalContainer.removeView(goalCardRoot);
-                        addedGoals.remove(goalTitle);
+                        goalViewModel.deleteGoal(goal.getId()).observe(getViewLifecycleOwner(), success -> {
+                            if (Boolean.TRUE.equals(success)) {
+                                Toast.makeText(getContext(), "Goal deleted", Toast.LENGTH_SHORT).show();
+                                
+                                 goalContainer.removeView(goalCardRoot);
+                                addedGoals.remove(goal.getTitle());
+                                adapter.add(goal.getTitle());
+                                adapter.notifyDataSetChanged();
+                                
+                            } else {
+                                Toast.makeText(getContext(), "Failed to delete goal", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     })
                     .setNegativeButton("Cancel", (dialog, which) -> {
                         goalCard.animate().translationX(0).setDuration(200).start();
@@ -207,8 +221,6 @@ public class GoalsFragment extends Fragment {
         });
 
         goalContainer.addView(goalCardRoot);
-        addedGoals.add(goalTitle);
     }
-
 
 }
