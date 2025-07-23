@@ -36,6 +36,7 @@ public class AuthRepository {
                     public void onResponse(@NonNull Call<AuthResponse> call, @NonNull Response<AuthResponse> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             tokenManager.saveToken(response.body().getToken());
+                            tokenManager.saveUser(response.body().getUser());
                             liveData.setValue(response.body());
                         } else {
                             try {
@@ -70,6 +71,7 @@ public class AuthRepository {
                     public void onResponse(@NonNull Call<AuthResponse> call, @NonNull Response<AuthResponse> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             tokenManager.saveToken(response.body().getToken());
+                            tokenManager.saveUser(response.body().getUser());
                             liveData.setValue(response.body());
                         } else {
                             liveData.setValue(null);
@@ -88,4 +90,21 @@ public class AuthRepository {
     public String getToken() {
         return tokenManager.getToken();
     }
+
+    public String getUserName() {
+        return tokenManager.getUserName();
+    }
+
+    public String getUserEmail() {
+        return tokenManager.getUserEmail();
+    }
+
+    public String getUserId() {
+        return tokenManager.getUserId();
+    }
+
+    public void logout() {
+        tokenManager.clearAll();
+    }
+
 }

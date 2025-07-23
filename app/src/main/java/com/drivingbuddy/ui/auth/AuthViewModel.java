@@ -27,4 +27,19 @@ public class AuthViewModel extends AndroidViewModel{
         return authRepository.getToken();
     }
 
+    public String getUserName() {
+        return authRepository.getUserName();
+    }
+
+    public String getUserEmail() {
+        return authRepository.getUserEmail();
+    }
+
+    public String getUserId() {
+        return authRepository.getUserId();
+    }
+
+    public void logout() {
+        authRepository.logout();
+    }
 }
