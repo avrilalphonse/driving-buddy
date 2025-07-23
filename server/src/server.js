@@ -4,6 +4,7 @@ import connectDB from './config/db.js';
 import config from './config/index.js';
 import authRoutes from './core/routes/authRoutes.js';
 import sensorDataRoutes from './core/routes/sensorDataRoutes.js';
+import goalRoutes from './core/routes/goalRoutes.js';
 
 const app = express();
 const server = createServer(app);
@@ -11,8 +12,10 @@ const server = createServer(app);
 app.use(express.json());
 connectDB();
 
+// Paths
 app.use('/api/auth', authRoutes);
 app.use('/api/sensor-data', sensorDataRoutes);
+app.use('/api/goals', goalRoutes);
 
 server.listen(config.port, () => {
   console.log(`Server running on port ${config.port}`);

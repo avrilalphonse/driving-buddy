@@ -9,6 +9,10 @@ const generateToken = (user) => {
   });
 };
 
+/**
+ * @desc Create a new user
+ * @route POST /api/auth/signup
+ */
 const signup = async (req, res) => {
   const { email, name, password } = req.body;
   try {
@@ -26,6 +30,10 @@ const signup = async (req, res) => {
   }
 };
 
+/**
+ * @desc Existing user can login
+ * @route POST /api/auth/login
+ */
 const login = async (req, res) => {
   const { email, password } = req.body;
   try {
