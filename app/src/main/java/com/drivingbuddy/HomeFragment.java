@@ -1,20 +1,15 @@
-package com.drivingbuddy.ui.home;
+package com.drivingbuddy;
 
 import android.graphics.Color;
 import android.os.Bundle;
+
+import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.drivingbuddy.DriveData;
-import com.drivingbuddy.R;
-import com.drivingbuddy.ui.goals.GoalViewModel;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -33,13 +28,11 @@ import java.util.List;
  */
 public class HomeFragment extends Fragment {
 
-    private GoalViewModel goalViewModel;
-    private HomeGoalAdapter homeGoalAdapter;
-
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
@@ -87,6 +80,18 @@ public class HomeFragment extends Fragment {
         };
         insights.setOnClickListener(goToInsights);
 
+        View goal1 = view.findViewById(R.id.goal1_container);
+        View goal2 = view.findViewById(R.id.goal2_container);
+        View goal3 = view.findViewById(R.id.goal3_container);
+        View.OnClickListener goToGoals = v -> {
+            BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottom_nav);
+            bottomNav.setSelectedItemId(R.id.goalsFragment);
+        };
+        goal1.setOnClickListener(goToGoals);
+        goal2.setOnClickListener(goToGoals);
+        goal3.setOnClickListener(goToGoals);
+
+
         List<DriveData> drives = new ArrayList<>();
         drives.add(new DriveData("Jul 8", 0, 4, 2, 5));
         drives.add(new DriveData("Jul 10", 2, 6, 1, 3));
@@ -113,30 +118,6 @@ public class HomeFragment extends Fragment {
 
         insightChart.getAxisLeft().setDrawGridLines(false);
         insightChart.invalidate();
-
-        // Goals Summary
-
-        RecyclerView goalRecycler = view.findViewById(R.id.home_goal_recycler);
-        TextView noGoalsMessage = view.findViewById(R.id.no_goals_message);
-
-        homeGoalAdapter = new HomeGoalAdapter(new ArrayList<>(), goal -> {
-            BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottom_nav);
-            bottomNav.setSelectedItemId(R.id.goalsFragment);
-        });
-
-        goalRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
-        goalRecycler.setAdapter(homeGoalAdapter);
-
-        goalViewModel = new ViewModelProvider(this).get(GoalViewModel.class);
-        goalViewModel.getGoals().observe(getViewLifecycleOwner(), goals -> {
-            if (goals == null || goals.isEmpty()) {
-                noGoalsMessage.setVisibility(View.VISIBLE);
-                homeGoalAdapter.setGoals(new ArrayList<>());
-            } else {
-                noGoalsMessage.setVisibility(View.GONE);
-                homeGoalAdapter.setGoals(goals);
-            }
-        });
 
         return view;
 

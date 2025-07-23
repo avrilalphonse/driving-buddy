@@ -1,4 +1,4 @@
-package com.drivingbuddy.ui.auth;
+package com.drivingbuddy.ui;
 
 import android.os.Bundle;
 
@@ -16,6 +16,7 @@ import android.text.TextUtils;
 import android.widget.*;
 import androidx.lifecycle.ViewModelProvider;
 import com.drivingbuddy.R;
+import com.drivingbuddy.ui.auth.AuthViewModel;
 
 public class SignupFragment extends Fragment {
 

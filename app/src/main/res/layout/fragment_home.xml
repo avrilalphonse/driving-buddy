@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="?android:colorBackground"
-    tools:context="com.drivingbuddy.ui.home.HomeFragment">
+    tools:context="com.drivingbuddy.HomeFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -17,7 +17,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/stats_title"
+            android:text="Statistics"
             android:textColor="?attr/colorOnBackground"
             android:textStyle="bold"
             android:padding="8dp"
@@ -28,7 +28,7 @@
             android:id="@+id/long_term_insight_summary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/long_term_title"
+            android:text="Long Term Insight Summary"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="?attr/colorOnBackground"
@@ -49,30 +49,145 @@
             android:id="@+id/goal_summary_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/home_goal_title"
+            android:text="Goal Summary"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="?attr/colorOnBackground"
             android:paddingBottom="12dp" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/home_goal_recycler"
+        <!-- Goal 1 -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/goal1_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            android:overScrollMode="never" />
+            app:cardCornerRadius="12dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            app:cardBackgroundColor="?attr/colorSurface">
 
-        
-        <TextView
-            android:id="@+id/no_goals_message"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:id="@+id/goal1_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Goal 1: Decrease hard braking"
+                    android:textSize="16sp"
+                    android:textColor="?attr/colorOnBackground"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/goal1_progress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Down 80% over the last week"
+                    android:textSize="14sp"
+                    android:textColor="?attr/colorPrimary" />
+
+                <TextView
+                    android:id="@+id/goal1_feedback"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Great Job!"
+                    android:textSize="14sp"
+                    android:textColor="?attr/colorOnBackground" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Goal 2 -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/goal2_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/zero_goals"
-            android:textSize="16sp"
-            android:textColor="?attr/colorOnBackground"
-            android:gravity="center"
-            android:visibility="gone"
-            android:padding="8dp" />
+            android:layout_marginBottom="8dp"
+            app:cardCornerRadius="12dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            app:cardBackgroundColor="?attr/colorSurface">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:id="@+id/goal2_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Goal 2: xxxxxx"
+                    android:textSize="16sp"
+                    android:textColor="?attr/colorOnBackground"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/goal2_progress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Up xx% over the last week"
+                    android:textSize="14sp"
+                    android:textColor="?attr/colorPrimary" />
+
+                <TextView
+                    android:id="@+id/goal2_feedback"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Needs more work!"
+                    android:textSize="14sp"
+                    android:textColor="?attr/colorOnBackground" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Goal 3 -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/goal3_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            app:cardCornerRadius="12dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            app:cardBackgroundColor="?attr/colorSurface">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:id="@+id/goal3_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Goal 3: xxxxxx"
+                    android:textSize="16sp"
+                    android:textColor="?attr/colorOnBackground"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/goal3_progress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Up xx% over the last week"
+                    android:textSize="14sp"
+                    android:textColor="?attr/colorPrimary" />
+
+                <TextView
+                    android:id="@+id/goal3_feedback"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Needs more work!"
+                    android:textSize="14sp"
+                    android:textColor="?attr/colorOnBackground" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
     </LinearLayout>
 </ScrollView>
