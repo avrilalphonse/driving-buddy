@@ -1,0 +1,47 @@
+# Secrets & credentials
+.env
+*.env.*
+*.pem
+*.key
+*.crt
+*.p12
+secrets/
+credentials/
+
+# Dependency folders
+node_modules/
+venv/
+__pycache__/
+dist/
+build/
+gradle/
+.idea/
+caches/
+
+.gradle/
+gradle.properties
+gradlew
+gradlew.bat
+local.properties
+settings.gradle
+build.gradle
+
+
+# IDE / system junk
+.DS_Store
+*.log
+*.swp
+
+# Git & config
+.git/
+.gitignore
+.cursorignore
+
+# Any large or private data folders
+*.csv
+*.sqlite
+*.db
+*.keystore	
+*.log
+
+README.md

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?android:colorBackground"
-    tools:context="com.drivingbuddy.GoalsFragment">
+    tools:context="com.drivingbuddy.ui.goals.GoalsFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -183,7 +183,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
                 android:text="Logout"
-                android:backgroundTint="@color/primary"
+                android:backgroundTint="@color/onSurface"
                 android:textColor="?attr/colorOnError"
                 style="?attr/materialButtonOutlinedStyle" />
         </LinearLayout>

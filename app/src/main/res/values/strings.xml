@@ -9,11 +9,17 @@
     <string name="goals_title">Goals</string>
     <string name="settings_title">Settings</string>
 
+    <string name="stats_title">Statistics</string>
+    <string name="long_term_title">Long Term Insight Summary</string>
+    <string name="home_goal_title">Goal Summary</string>
+    <string name="zero_goals">No goals yet! Create a goal on the Goals Page </string>
+
     <string-array name="goal_options">
         <item>Better lane changes</item>
         <item>No hard brakes</item>
         <item>No sharp turning</item>
         <item>Consistent Speeds</item>
     </string-array>
+    <string name="goal_card">Goal Title</string>
 
 </resources>
