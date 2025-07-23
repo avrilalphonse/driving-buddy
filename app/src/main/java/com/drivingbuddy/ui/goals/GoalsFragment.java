@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
 import android.widget.ArrayAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -13,6 +14,9 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.drivingbuddy.R;
 import com.drivingbuddy.data.model.Goal;
+import com.drivingbuddy.ui.auth.AuthViewModel;
+import com.drivingbuddy.ui.goals.GoalViewModel;
+import com.drivingbuddy.ui.goals.GoalAdapter;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,6 +27,7 @@ import java.util.ArrayList;
 
 public class GoalsFragment extends Fragment {
 
+    private AuthViewModel authViewModel;
     private AutoCompleteTextView goalDropdown;
     private FrameLayout goalContainer;
     private RecyclerView goalRecyclerView;
@@ -39,9 +44,22 @@ public class GoalsFragment extends Fragment {
     );
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_goals, container, false);
+
+        String userName = authViewModel.getUserName();
+
+        TextView goals_title = root.findViewById(R.id.goals_title);
+        if (userName != null && !userName.isEmpty()) {
+            goals_title.setText(userName + "'s Goals");
+        }
 
         goalDropdown = root.findViewById(R.id.goal_dropdown);
         goalContainer = root.findViewById(R.id.goal_container);
