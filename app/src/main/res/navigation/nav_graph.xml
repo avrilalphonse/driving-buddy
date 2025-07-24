@@ -65,8 +65,8 @@
         android:label="@string/notifs_title" />
 
     <fragment
-        android:id="@+id/permissionsFragment"
-        android:name="com.drivingbuddy.ui.settings.PermissionsFragment"
+        android:id="@+id/termsFragment"
+        android:name="com.drivingbuddy.ui.settings.TermsFragment"
         android:label="@string/perms_title" />
 
 </navigation>

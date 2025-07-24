@@ -108,9 +108,9 @@ public class SettingsFragment extends Fragment {
             navController.navigate(R.id.notificationsFragment);
         });
 
-        View permissionsContainer = view.findViewById(R.id.permissions_container);
-        permissionsContainer.setOnClickListener(v -> {
-            navController.navigate(R.id.permissionsFragment);
+        View termsContainer = view.findViewById(R.id.permissions_container);
+        termsContainer.setOnClickListener(v -> {
+            navController.navigate(R.id.termsFragment);
         });
 
         return view;
