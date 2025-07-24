@@ -1,4 +1,4 @@
-package com.drivingbuddy;
+package com.drivingbuddy.ui.settings;
 
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -11,6 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.drivingbuddy.MainActivity;
+import com.drivingbuddy.R;
 import com.drivingbuddy.ui.auth.AuthViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -101,9 +103,16 @@ public class SettingsFragment extends Fragment {
             navController.navigate(R.id.dataCollectionFragment);
         });
 
-        return view;
+        View notificationsContainer = view.findViewById(R.id.notifications_container);
+        notificationsContainer.setOnClickListener(v -> {
+            navController.navigate(R.id.notificationsFragment);
+        });
 
-        // Inflate the layout for this fragment
-        // return inflater.inflate(R.layout.fragment_settings, container, false);
+        View permissionsContainer = view.findViewById(R.id.permissions_container);
+        permissionsContainer.setOnClickListener(v -> {
+            navController.navigate(R.id.permissionsFragment);
+        });
+
+        return view;
     }
 }

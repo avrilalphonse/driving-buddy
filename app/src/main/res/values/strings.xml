@@ -30,6 +30,6 @@
     <string name="notifs_title">Notifications</string>
     <string name="perms_title">Permissions</string>
 
-
+    <string name="logout">Logout</string>
 
 </resources>

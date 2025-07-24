@@ -22,7 +22,7 @@
 
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="com.drivingbuddy.SettingsFragment"
+        android:name="com.drivingbuddy.ui.settings.SettingsFragment"
         android:label="Settings">
         <action
             android:id="@+id/action_settings_to_profile"
@@ -35,6 +35,7 @@
         android:label="Profile"
         tools:layout="@layout/fragment_profile">
     </fragment>
+
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.drivingbuddy.ui.auth.LoginFragment"
@@ -55,7 +56,17 @@
 
     <fragment
         android:id="@+id/dataCollectionFragment"
-        android:name="com.drivingbuddy.DataCollectionFragment"
+        android:name="com.drivingbuddy.ui.settings.DataCollectionFragment"
         android:label="@string/privacy_title" />
+
+    <fragment
+        android:id="@+id/notificationsFragment"
+        android:name="com.drivingbuddy.ui.settings.NotificationsFragment"
+        android:label="@string/notifs_title" />
+
+    <fragment
+        android:id="@+id/permissionsFragment"
+        android:name="com.drivingbuddy.ui.settings.PermissionsFragment"
+        android:label="@string/perms_title" />
 
 </navigation>
