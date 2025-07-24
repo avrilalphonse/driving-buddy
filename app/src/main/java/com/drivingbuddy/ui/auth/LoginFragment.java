@@ -1,4 +1,4 @@
-package com.drivingbuddy.ui;
+package com.drivingbuddy.ui.auth;
 
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -13,7 +13,6 @@ import com.drivingbuddy.R;
 import android.text.TextUtils;
 import android.widget.*;
 import androidx.lifecycle.ViewModelProvider;
-import com.drivingbuddy.ui.auth.AuthViewModel;
 
 public class LoginFragment extends Fragment {
 

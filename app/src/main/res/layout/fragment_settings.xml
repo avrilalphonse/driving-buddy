@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?android:colorBackground"
-    tools:context="com.drivingbuddy.GoalsFragment">
+    tools:context="com.drivingbuddy.SettingsFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,6 +15,7 @@
 
         <!-- Profile Title -->
         <TextView
+            android:id="@+id/profile_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Profile"
@@ -31,8 +32,11 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="16dp">
-
+            android:layout_marginBottom="16dp"
+            android:padding="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground">
             <ImageView
                 android:id="@+id/profile_image"
                 android:layout_width="56dp"
@@ -42,20 +46,35 @@
                 android:scaleType="centerCrop"
                 android:layout_marginEnd="16dp"
                 android:clipToOutline="true"
-                android:outlineProvider="background" />
+                android:outlineProvider="background"
+                android:layout_gravity="center"/>
 
             <TextView
                 android:id="@+id/profile_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Full Name"
-                android:textSize="18sp"
+                android:text="Name"
+                android:textSize="22sp"
                 android:textColor="?attr/colorOnBackground"
-                android:textStyle="normal" />
+                android:textStyle="normal"
+                android:layout_gravity="center"/>
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent" />
+
+            <ImageView
+                android:id="@+id/pencil_icon"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/ic_edit"
+                android:contentDescription="View Profile"/>
         </LinearLayout>
 
         <!-- Settings Title -->
         <TextView
+            android:id="@+id/setting_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Settings"
@@ -65,32 +84,32 @@
             android:textSize="26sp" />
 
         <!-- Settings Options -->
-        <LinearLayout
-            android:id="@+id/personal_info_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingVertical="12dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:gravity="center_vertical"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="?attr/selectableItemBackground">
+<!--        <LinearLayout-->
+<!--            android:id="@+id/personal_info_container"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:orientation="horizontal"-->
+<!--            android:paddingVertical="12dp"-->
+<!--            android:paddingStart="16dp"-->
+<!--            android:paddingEnd="16dp"-->
+<!--            android:gravity="center_vertical"-->
+<!--            android:clickable="true"-->
+<!--            android:focusable="true"-->
+<!--            android:background="?attr/selectableItemBackground">-->
 
-            <TextView
-                android:id="@+id/personal_info"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Personal Information"
-                android:textSize="18sp"
-                android:textColor="?attr/colorOnBackground"
-                android:textStyle="normal" />
-        </LinearLayout>
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#CCC" />
+<!--            <TextView-->
+<!--                android:id="@+id/personal_info"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Personal Information"-->
+<!--                android:textSize="18sp"-->
+<!--                android:textColor="?attr/colorOnBackground"-->
+<!--                android:textStyle="normal" />-->
+<!--        </LinearLayout>-->
+<!--        <View-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="1dp"-->
+<!--            android:background="#CCC" />-->
 
         <LinearLayout
             android:id="@+id/data_collection_container"
@@ -168,10 +187,10 @@
                 android:textColor="?attr/colorOnBackground"
                 android:textStyle="normal" />
         </LinearLayout>
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#CCC" />
+<!--        <View-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="1dp"-->
+<!--            android:background="#CCC" />-->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -183,7 +202,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
                 android:text="Logout"
-                android:backgroundTint="@color/primary"
+                android:backgroundTint="@color/onSurface"
                 android:textColor="?attr/colorOnError"
                 style="?attr/materialButtonOutlinedStyle" />
         </LinearLayout>

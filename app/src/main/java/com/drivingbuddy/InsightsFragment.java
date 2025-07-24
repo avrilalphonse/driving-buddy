@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.drivingbuddy.ui.auth.AuthViewModel;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -27,9 +29,24 @@ public class InsightsFragment extends Fragment {
 
     private final List<DriveData> drives = new ArrayList<>();
 
+    private AuthViewModel authViewModel;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_insights, container, false);
+
+        String userName = authViewModel.getUserName();
+
+        TextView insights_title = view.findViewById(R.id.insights_title);
+        if (userName != null && !userName.isEmpty()) {
+            insights_title.setText(userName + "'s Insights");
+        }
 
         populateDummyData();
         Collections.reverse(drives); // Ensure chronological order

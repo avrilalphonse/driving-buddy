@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/loginFragment">
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.drivingbuddy.HomeFragment"
+        android:name="com.drivingbuddy.ui.home.HomeFragment"
         android:label="Home" />
 
     <fragment
@@ -16,17 +17,27 @@
 
     <fragment
         android:id="@+id/goalsFragment"
-        android:name="com.drivingbuddy.GoalsFragment"
+        android:name="com.drivingbuddy.ui.goals.GoalsFragment"
         android:label="Goals" />
 
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.drivingbuddy.SettingsFragment"
-        android:label="Settings" />
+        android:label="Settings">
+        <action
+            android:id="@+id/action_settings_to_profile"
+            app:destination="@+id/profileFragment" />
+    </fragment>
 
     <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.drivingbuddy.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile">
+    </fragment>
+    <fragment
         android:id="@+id/loginFragment"
-        android:name="com.drivingbuddy.ui.LoginFragment"
+        android:name="com.drivingbuddy.ui.auth.LoginFragment"
         android:label="Log In">
         <action
             android:id="@+id/action_loginFragment_to_signupFragment"
@@ -35,7 +46,7 @@
 
     <fragment
         android:id="@+id/signupFragment"
-        android:name="com.drivingbuddy.ui.SignupFragment"
+        android:name="com.drivingbuddy.ui.auth.SignupFragment"
         android:label="Sign Up" >
         <action
             android:id="@+id/action_signupFragment_to_loginFragment"

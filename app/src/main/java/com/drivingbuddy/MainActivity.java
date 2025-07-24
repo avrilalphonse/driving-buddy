@@ -12,6 +12,8 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 import androidx.appcompat.widget.Toolbar;
+
+import android.view.Menu;
 import android.view.View;
 
 import com.drivingbuddy.ui.auth.AuthViewModel;
@@ -48,12 +50,20 @@ public class MainActivity extends AppCompatActivity {
             }
 
             navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
-                if (destination.getId() == R.id.loginFragment || destination.getId() == R.id.signupFragment) {
+                int destination_id = destination.getId();
+                if (destination_id == R.id.loginFragment || destination_id == R.id.signupFragment) {
                     bottomNavigationView.setVisibility(View.GONE);
                     toolbar.setVisibility(View.VISIBLE);
                 } else {
                     bottomNavigationView.setVisibility(View.VISIBLE);
                     toolbar.setVisibility(View.VISIBLE);
+
+                    // overriding navigation selection for profile
+                    if (destination_id == R.id.profileFragment) {
+                        Menu menu = bottomNavigationView.getMenu();
+                        menu.findItem(R.id.settingsFragment).setChecked(true);
+                    }
+
                 }
             });
         }

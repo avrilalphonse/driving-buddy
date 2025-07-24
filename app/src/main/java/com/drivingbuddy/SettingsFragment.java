@@ -3,10 +3,15 @@ package com.drivingbuddy;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+
+import com.drivingbuddy.ui.auth.AuthViewModel;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -23,6 +28,8 @@ public class SettingsFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private AuthViewModel authViewModel;
 
     public SettingsFragment() {
         // Required empty public constructor
@@ -49,6 +56,7 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -59,6 +67,22 @@ public class SettingsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
+        String userName = authViewModel.getUserName();
+
+        TextView profile_title = view.findViewById(R.id.profile_title);
+        TextView nameTextView = view.findViewById(R.id.profile_name);
+
+        if (userName != null && !userName.isEmpty()) {
+            profile_title.setText(userName + "'s Profile");
+            nameTextView.setText(userName);
+        } else {
+            nameTextView.setText("Guest");
+        }
+
+        View profile = view.findViewById(R.id.profile_info_container);
+        profile.setOnClickListener(v -> {
+            Navigation.findNavController(v).navigate(R.id.action_settings_to_profile);
+        });
 
         // when logout is clicked, log the user out and return to the login screen
         View logout_btn = view.findViewById(R.id.logout_btn);
