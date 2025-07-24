@@ -7,6 +7,13 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.util.Log;
+import com.drivingbuddy.data.api.ApiClient;
+import com.drivingbuddy.data.api.SensorApiService;
+import com.drivingbuddy.data.model.SensorCounts;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -59,6 +66,24 @@ public class SettingsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
+
+//        // testing if i can see sensor data in the settings fragment - it worked!
+//        SensorApiService sensorApi = ApiClient.getSensorApiService();
+//        sensorApi.getCounts().enqueue(new Callback<SensorCounts>() {
+//            @Override
+//            public void onResponse(Call<SensorCounts> call, Response<SensorCounts> response) {
+//                if (response.isSuccessful() && response.body() != null) {
+//                    SensorCounts counts = response.body();
+//                    Log.d("SensorData", "Hard braking: " + counts.getHardBrakingCount());
+//                    Log.d("SensorData", "Inconsistent speed: " + counts.getInconsistentSpeedCount());
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<SensorCounts> call, Throwable t) {
+//                Log.e("SensorData", "Failed to get counts: " + t.getMessage());
+//            }
+//        });
 
         // when logout is clicked, log the user out and return to the login screen
         View logout_btn = view.findViewById(R.id.logout_btn);

@@ -33,4 +33,8 @@ public class ApiClient {
     public static AuthApiService getAuthApiService() {
         return getClient().create(AuthApiService.class);
     }
+
+    public static SensorApiService getSensorApiService() {
+        return getClient().create(SensorApiService.class);
+    }
 }

@@ -1,6 +1,6 @@
 import express from 'express';
 const router = express.Router();
-import { importCsvToMongoDB } from '../controllers/sensorDataController.js';
+import { importCsvToMongoDB, getSimpleCounts, debugHardBraking, clearAllData } from '../controllers/sensorDataController.js';
 
 // Example: POST /api/sensor-data/import
 router.post('/import', async (req, res) => {
@@ -11,5 +11,9 @@ router.post('/import', async (req, res) => {
     res.status(500).send(err.message);
   }
 });
+
+router.get('/counts', getSimpleCounts);
+router.get('/debug-braking', debugHardBraking);
+router.delete('/clear', clearAllData);
 
 export default router;
