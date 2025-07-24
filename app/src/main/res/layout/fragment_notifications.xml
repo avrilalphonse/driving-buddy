@@ -15,4 +15,30 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/switch_push_notifications"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Enable Push Notifications"
+        android:textSize="16sp"
+        android:thumbTint="@color/primaryVariant"
+        android:trackTint="@color/primaryVariant"
+        app:layout_constraintTop_toBottomOf="@id/notifications_toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="32dp" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/switch_email_notifications"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Enable Email Notifications"
+        android:textSize="16sp"
+        android:thumbTint="@color/primaryVariant"
+        android:trackTint="@color/primaryVariant"
+        app:layout_constraintTop_toBottomOf="@id/switch_push_notifications"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
