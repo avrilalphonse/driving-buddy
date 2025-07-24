@@ -15,8 +15,6 @@ import androidx.lifecycle.ViewModelProvider;
 import com.drivingbuddy.R;
 import com.drivingbuddy.data.model.Goal;
 import com.drivingbuddy.ui.auth.AuthViewModel;
-import com.drivingbuddy.ui.goals.GoalViewModel;
-import com.drivingbuddy.ui.goals.GoalAdapter;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
