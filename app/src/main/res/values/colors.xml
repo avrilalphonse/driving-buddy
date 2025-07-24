@@ -3,6 +3,9 @@
     <color name="primaryVariant">#0E4545</color>
     <color name="secondary">#E6A4A4</color>
     <color name="secondaryVariant">#D28F8F</color>
+    <color name="peach">#FFD6C0</color>
+    <color name="rose">#F6C1B5</color>
+    <color name="sand">#F4E3D7</color>
     <color name="background">#F6F4EF</color>
     <color name="surface">#D9D4CC</color>
     <color name="onPrimary">#FFFFFF</color>

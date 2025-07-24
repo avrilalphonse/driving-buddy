@@ -128,6 +128,33 @@ public class HomeFragment extends Fragment {
         insightChart.getAxisLeft().setDrawGridLines(false);
         insightChart.invalidate();
 
+        // music
+        View musicButton = view.findViewById(R.id.btn_start_drive_music);
+        musicButton.setOnClickListener(v -> {
+            android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(requireContext());
+            builder.setTitle("Choose Music Service");
+            String[] services = {"Spotify", "Apple Music", "SoundCloud"};
+            builder.setItems(services, (dialog, which) -> {
+                String url = null;
+                switch (which) {
+                    case 0: // spotify
+                        url = "https://open.spotify.com/search/driving%20music"; // driving music search
+                        break;
+                    case 1: // apple music
+                        url = "https://music.apple.com/us/search?term=driving%20music"; 
+                        break;
+                    case 2: // soundcloud
+                        url = "https://soundcloud.com/search/sets?q=driving%20music";
+                        break;
+                }
+                if (url != null) {
+                    android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url));
+                    startActivity(intent);
+                }
+            });
+            builder.show();
+        });
+
         // Goals Summary
 
         RecyclerView goalRecycler = view.findViewById(R.id.home_goal_recycler);
@@ -151,7 +178,6 @@ public class HomeFragment extends Fragment {
                 homeGoalAdapter.setGoals(goals);
             }
         });
-
         return view;
 
         // Inflate the layout for this fragment
