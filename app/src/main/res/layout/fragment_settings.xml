@@ -15,6 +15,7 @@
 
         <!-- Profile Title -->
         <TextView
+            android:id="@+id/profile_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Profile"
@@ -49,13 +50,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Full Name"
-                android:textSize="18sp"
+                android:textSize="22sp"
                 android:textColor="?attr/colorOnBackground"
                 android:textStyle="normal" />
         </LinearLayout>
 
         <!-- Settings Title -->
         <TextView
+            android:id="@+id/setting_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Settings"
