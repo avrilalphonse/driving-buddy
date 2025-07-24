@@ -46,17 +46,6 @@
 
         </LinearLayout>
 
-        <!-- Title -->
-        <TextView
-            android:id="@+id/home_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/stats_title"
-            android:textColor="?attr/colorOnBackground"
-            android:textStyle="bold"
-            android:padding="8dp"
-            android:textSize="26sp" />
-
         <!-- Long Term Insight Summary -->
         <TextView
             android:id="@+id/long_term_insight_summary"
@@ -66,19 +55,23 @@
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="?attr/colorOnBackground"
+            android:paddingTop="12dp"
             android:paddingBottom="12dp" />
 
         <!-- Insights Graph -->
-        <com.github.mikephil.charting.charts.LineChart
-            android:id="@+id/long_term_insight_chart"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginBottom="16dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="?attr/selectableItemBackground" />
 
         <!-- Goals Title -->
+
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/long_term_insight_chart"
+            android:layout_width="370dp"
+            android:layout_height="250dp"
+            android:layout_marginBottom="16dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_gravity="center_horizontal" />
+
         <TextView
             android:id="@+id/goal_summary_header"
             android:layout_width="match_parent"
@@ -87,6 +80,7 @@
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="?attr/colorOnBackground"
+            android:paddingTop="13dp"
             android:paddingBottom="12dp" />
 
         <androidx.recyclerview.widget.RecyclerView

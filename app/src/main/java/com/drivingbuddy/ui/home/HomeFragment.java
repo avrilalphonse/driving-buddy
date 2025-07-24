@@ -89,9 +89,17 @@ public class HomeFragment extends Fragment {
 
         String userName = authViewModel.getUserName();
 
-        TextView home_title = view.findViewById(R.id.home_title);
+//        TextView home_title = view.findViewById(R.id.home_title);
+//        if (userName != null && !userName.isEmpty()) {
+//            home_title.setText(userName + "'s Statistics");
+//        }
+
+        // welcome banner
+        TextView welcomeHeader = view.findViewById(R.id.welcome_header);
         if (userName != null && !userName.isEmpty()) {
-            home_title.setText(userName + "'s Statistics");
+            welcomeHeader.setText("Welcome, " + userName + "!");
+        } else {
+            welcomeHeader.setText("Welcome!");
         }
 
         View insights = view.findViewById(R.id.long_term_insight_chart);

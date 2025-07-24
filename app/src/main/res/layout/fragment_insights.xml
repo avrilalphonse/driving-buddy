@@ -44,7 +44,7 @@
                     android:id="@+id/chartLabel1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Bad Lane Changing"
+                    android:text="Lane Deviation"
                     android:textColor="?attr/colorOnBackground"
                     android:textSize="14sp"
                     android:textStyle="bold"
