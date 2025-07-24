@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -77,39 +76,11 @@
             android:id="@+id/setting_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Settings"
+            android:text="@string/settings_title"
             android:textColor="?attr/colorOnBackground"
             android:textStyle="bold"
             android:padding="8dp"
             android:textSize="26sp" />
-
-        <!-- Settings Options -->
-        <!--        <LinearLayout-->
-        <!--            android:id="@+id/personal_info_container"-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:orientation="horizontal"-->
-        <!--            android:paddingVertical="12dp"-->
-        <!--            android:paddingStart="16dp"-->
-        <!--            android:paddingEnd="16dp"-->
-        <!--            android:gravity="center_vertical"-->
-        <!--            android:clickable="true"-->
-        <!--            android:focusable="true"-->
-        <!--            android:background="?attr/selectableItemBackground">-->
-
-        <!--            <TextView-->
-        <!--                android:id="@+id/personal_info"-->
-        <!--                android:layout_width="wrap_content"-->
-        <!--                android:layout_height="wrap_content"-->
-        <!--                android:text="Personal Information"-->
-        <!--                android:textSize="18sp"-->
-        <!--                android:textColor="?attr/colorOnBackground"-->
-        <!--                android:textStyle="normal" />-->
-        <!--        </LinearLayout>-->
-        <!--        <View-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="1dp"-->
-        <!--            android:background="#CCC" />-->
 
         <LinearLayout
             android:id="@+id/data_collection_container"
@@ -128,11 +99,12 @@
                 android:id="@+id/data_collection"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Data Collection/ Privacy"
+                android:text="@string/privacy_title"
                 android:textSize="18sp"
                 android:textColor="?attr/colorOnBackground"
                 android:textStyle="normal" />
         </LinearLayout>
+
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
@@ -155,11 +127,12 @@
                 android:id="@+id/notifications"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Notifications"
+                android:text="@string/notifs_title"
                 android:textSize="18sp"
                 android:textColor="?attr/colorOnBackground"
                 android:textStyle="normal" />
         </LinearLayout>
+
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
@@ -187,10 +160,7 @@
                 android:textColor="?attr/colorOnBackground"
                 android:textStyle="normal" />
         </LinearLayout>
-        <!--        <View-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="1dp"-->
-        <!--            android:background="#CCC" />-->
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">

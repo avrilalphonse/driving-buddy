@@ -22,4 +22,14 @@
     </string-array>
     <string name="goal_card">Goal Title</string>
 
+    <string name="privacy_title">Data Collection/Privacy</string>
+    <string name="how_we_detect">How We Detect Driving Events</string>
+    <string name="back_arrow">Back</string>
+    <string name="menu">Menu</string>
+
+    <string name="notifs_title">Notifications</string>
+    <string name="perms_title">Permissions</string>
+
+
+
 </resources>

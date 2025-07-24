@@ -1,17 +1,18 @@
 package com.drivingbuddy;
 
-import android.os.Bundle;
-
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.drivingbuddy.ui.auth.AuthViewModel;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -19,6 +20,7 @@ import com.drivingbuddy.ui.auth.AuthViewModel;
  * create an instance of this fragment.
  */
 public class SettingsFragment extends Fragment {
+    private NavController navController;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -84,14 +86,24 @@ public class SettingsFragment extends Fragment {
             Navigation.findNavController(v).navigate(R.id.action_settings_to_profile);
         });
 
+        navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
+
         // when logout is clicked, log the user out and return to the login screen
         View logout_btn = view.findViewById(R.id.logout_btn);
         logout_btn.setOnClickListener(v -> {
             ((MainActivity) getActivity()).logout();
         });
+
+        BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottom_nav);
+
+        View dataCollectionContainer = view.findViewById(R.id.data_collection_container);
+        dataCollectionContainer.setOnClickListener(v -> {
+            navController.navigate(R.id.dataCollectionFragment);
+        });
+
         return view;
 
-//        // Inflate the layout for this fragment
-//        return inflater.inflate(R.layout.fragment_settings, container, false);
+        // Inflate the layout for this fragment
+        // return inflater.inflate(R.layout.fragment_settings, container, false);
     }
 }

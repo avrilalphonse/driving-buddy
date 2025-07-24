@@ -52,4 +52,10 @@
             android:id="@+id/action_signupFragment_to_loginFragment"
             app:destination="@id/loginFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/dataCollectionFragment"
+        android:name="com.drivingbuddy.DataCollectionFragment"
+        android:label="@string/privacy_title" />
+
 </navigation>
