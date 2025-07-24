@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -77,6 +78,11 @@ public class SettingsFragment extends Fragment {
         } else {
             nameTextView.setText("Guest");
         }
+
+        View profile = view.findViewById(R.id.profile_info_container);
+        profile.setOnClickListener(v -> {
+            Navigation.findNavController(v).navigate(R.id.action_settings_to_profile);
+        });
 
         // when logout is clicked, log the user out and return to the login screen
         View logout_btn = view.findViewById(R.id.logout_btn);
