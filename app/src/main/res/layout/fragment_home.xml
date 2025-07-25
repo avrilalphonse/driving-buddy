@@ -59,19 +59,32 @@
             android:paddingBottom="12dp" />
 
         <!-- Insights Graph -->
-
-        <!-- Goals Title -->
-
-        <com.github.mikephil.charting.charts.LineChart
-            android:id="@+id/long_term_insight_chart"
-            android:layout_width="370dp"
+        <FrameLayout
+            android:id="@+id/chart_container"
+            android:layout_width="match_parent"
             android:layout_height="250dp"
             android:layout_marginBottom="16dp"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
-            android:focusable="true"
-            android:layout_gravity="center_horizontal" />
+            android:focusable="true">
 
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/long_term_insight_chart"
+                android:layout_width="370dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_horizontal"
+                android:clickable="false"
+                android:focusable="false" />
+
+            <ProgressBar
+                android:id="@+id/chart_progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <!-- Goals Title -->
         <TextView
             android:id="@+id/goal_summary_header"
             android:layout_width="match_parent"
