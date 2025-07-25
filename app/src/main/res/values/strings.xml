@@ -28,8 +28,7 @@
     <string name="menu">Menu</string>
 
     <string name="notifs_title">Notifications</string>
-    <string name="perms_title">Permissions</string>
-
+    <string name="perms_title">Terms and Conditions</string>
     <string name="logout">Logout</string>
 
 </resources>
