@@ -1,6 +1,7 @@
 package com.drivingbuddy.ui.goals;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,11 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.drivingbuddy.R;
+import com.drivingbuddy.data.api.ApiClient;
+import com.drivingbuddy.data.api.SensorDataApiService;
+import com.drivingbuddy.data.DrivingDataCache;
+import com.drivingbuddy.data.model.BucketedDataResponse;
+import com.drivingbuddy.data.model.DriveDataResponse;
 import com.drivingbuddy.data.model.Goal;
 import com.drivingbuddy.ui.auth.AuthViewModel;
 
@@ -20,8 +26,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.widget.FrameLayout;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class GoalsFragment extends Fragment {
 
@@ -32,6 +44,7 @@ public class GoalsFragment extends Fragment {
     private GoalViewModel goalViewModel;
     private ArrayAdapter<String> adapter;
     private GoalAdapter goalAdapter;
+    private SensorDataApiService apiService;
 
     private final List<Goal> goals = new ArrayList<>();
     private final List<String> allGoals = Arrays.asList(
@@ -40,6 +53,8 @@ public class GoalsFragment extends Fragment {
             "Reduce inconsistent speeds",
             "Reduce lane deviation"
     );
+
+    private final Map<String, Integer> goalProgress = new HashMap<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,11 +68,15 @@ public class GoalsFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_goals, container, false);
 
         String userName = authViewModel.getUserName();
+        String userEmail = authViewModel.getUserEmail();
 
         TextView goals_title = root.findViewById(R.id.goals_title);
         if (userName != null && !userName.isEmpty()) {
             goals_title.setText(userName + "'s Goals");
         }
+
+        // api service setup
+        apiService = ApiClient.getClient().create(SensorDataApiService.class);
 
         goalDropdown = root.findViewById(R.id.goal_dropdown);
         goalContainer = root.findViewById(R.id.goal_container);
@@ -92,6 +111,16 @@ public class GoalsFragment extends Fragment {
 
         goalViewModel = new ViewModelProvider(this).get(GoalViewModel.class);
 
+        // fetch data from sensor-data collection
+        if (userEmail != null && userEmail.equals("test@gmail.com")) {
+            BucketedDataResponse cachedData = DrivingDataCache.getCachedData();
+            if (cachedData != null) {
+                calculateProgressFromData(cachedData);
+            } else {
+                fetchDrivingDataAndUpdateProgress();
+            }
+        }
+
         reloadGoalsFromBackend();
 
         goalDropdown.setOnItemClickListener((parent, view, position, id) -> {
@@ -107,6 +136,11 @@ public class GoalsFragment extends Fragment {
                 goalDropdown.setEnabled(true);
 
                 if (goal != null) {
+                    // set initial progress if available
+                    Integer progress = goalProgress.get(goal.getTitle());
+                    if (progress != null) {
+                        goal.setProgress(progress);
+                    }
                     goals.add(goal);
                     goalAdapter.notifyItemInserted(goals.size() - 1);
                     Toast.makeText(getContext(), "Goal added!", Toast.LENGTH_SHORT).show();
@@ -128,6 +162,12 @@ public class GoalsFragment extends Fragment {
             goals.clear();
             if (backendGoals != null) {
                 for (Goal goal : backendGoals) {
+                    Integer progress = goalProgress.get(goal.getTitle());
+                    if (progress != null) {
+                        goal.setProgress(progress);
+                    } else {
+                    }
+
                     goals.add(goal);
                 }
             }
@@ -145,4 +185,78 @@ public class GoalsFragment extends Fragment {
             }        }
         return -1;
     }
+
+    private void fetchDrivingDataAndUpdateProgress() {
+        Call<BucketedDataResponse> call = apiService.getBucketedData(10);
+
+        call.enqueue(new Callback<BucketedDataResponse>() {
+            @Override
+            public void onResponse(Call<BucketedDataResponse> call, Response<BucketedDataResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    BucketedDataResponse data = response.body();
+                    DrivingDataCache.setCachedData(data);
+                    calculateProgressFromData(data);
+                } else {
+                    Log.e("GoalsFragment", "Failed to fetch driving data");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BucketedDataResponse> call, Throwable t) {
+                Log.e("GoalsFragment", "Network error: " + t.getMessage());
+            }
+        });
+    }
+
+    private void calculateProgressFromData(BucketedDataResponse data) {
+        // init counters
+        int totalDrives = 0;
+        int goodBrakingDrives = 0;
+        int goodSpeedDrives = 0;
+        int goodLaneDeviationDrives = 0;
+
+        // count of drives with good behavior (0 incidents)
+        for (DriveDataResponse drive : data.getDrives()) {
+            totalDrives++;
+
+            if (drive.getIncidents().getSuddenBraking() == 0) {
+                goodBrakingDrives++;
+            }
+            if (drive.getIncidents().getInconsistentSpeed() == 0) {
+                goodSpeedDrives++;
+            }
+            if (drive.getIncidents().getLaneDeviation() == 0) {
+                goodLaneDeviationDrives++;
+            }
+        }
+
+        // calc progress (2% per good drive, max 100%)
+        int brakingProgress = Math.min(100, goodBrakingDrives * 2);
+        int speedProgress = Math.min(100, goodSpeedDrives * 2);
+        int laneProgress = Math.min(100, goodLaneDeviationDrives * 2);
+
+        // store progress values
+        goalProgress.put("Reduce sudden braking", brakingProgress);
+        goalProgress.put("Reduce sharp turns", 0); // No data available
+        goalProgress.put("Reduce inconsistent speeds", speedProgress);
+        goalProgress.put("Reduce lane deviation", laneProgress);
+
+        // update existing goals with new progress
+        updateGoalsWithProgress();
+    }
+
+    private void updateGoalsWithProgress() {
+        for (Goal goal : goals) {
+            Integer progress = goalProgress.get(goal.getTitle());
+            if (progress != null) {
+                goal.setProgress(progress);
+            }
+        }
+
+        // notify adapter to refresh the views
+        if (goalAdapter != null) {
+            goalAdapter.notifyDataSetChanged();
+        }
+    }
+
 }
