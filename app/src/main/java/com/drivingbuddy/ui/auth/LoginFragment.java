@@ -1,5 +1,6 @@
 package com.drivingbuddy.ui.auth;
 
+import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -9,6 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.drivingbuddy.MainActivity;
 import com.drivingbuddy.R;
 import android.text.TextUtils;
 import android.widget.*;
@@ -59,8 +62,9 @@ public class LoginFragment extends Fragment {
                 if (authResponse != null && authResponse.getUser() != null) {
                     String name = authResponse.getUser().getName();
                     Toast.makeText(getContext(), "Login successful. Welcome " + name, Toast.LENGTH_SHORT).show();
-                    NavHostFragment.findNavController(LoginFragment.this)
-                            .navigate(R.id.homeFragment);
+                    Intent intent = new Intent(requireActivity(), MainActivity.class);
+                    startActivity(intent);
+                    requireActivity().finish();
                 } else {
                     Toast.makeText(getContext(), "Login failed. Please check credentials.", Toast.LENGTH_SHORT).show();
                 }

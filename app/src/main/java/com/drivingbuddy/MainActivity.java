@@ -1,5 +1,6 @@
 package com.drivingbuddy;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -17,6 +18,7 @@ import android.view.Menu;
 import android.view.View;
 
 import com.drivingbuddy.ui.auth.AuthViewModel;
+import com.drivingbuddy.utils.TokenManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
@@ -27,6 +29,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        TokenManager tokenManager = new TokenManager(this);
+        if (tokenManager.getToken() == null) {
+            Intent intent = new Intent(this, com.drivingbuddy.ui.auth.AuthActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -44,6 +54,11 @@ public class MainActivity extends AppCompatActivity {
 
         if (navHostFragment != null) {
             navController = navHostFragment.getNavController();
+
+            if (tokenManager.getToken() != null) {
+                // User is logged in, navigate to home
+                navController.navigate(R.id.homeFragment);
+            }
 
             if (bottomNavigationView != null) {
                 NavigationUI.setupWithNavController(bottomNavigationView, navController);
@@ -72,6 +87,9 @@ public class MainActivity extends AppCompatActivity {
     public void logout() {
         AuthViewModel authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
         authViewModel.logout();
-        navController.navigate(R.id.loginFragment);
+
+        Intent intent = new Intent(this, com.drivingbuddy.ui.auth.AuthActivity.class);
+        startActivity(intent);
+        finish();
     }
 }
