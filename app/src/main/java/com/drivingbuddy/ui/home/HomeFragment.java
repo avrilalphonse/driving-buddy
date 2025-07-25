@@ -7,11 +7,17 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.drivingbuddy.data.api.ApiClient;
+import com.drivingbuddy.data.api.SensorDataApiService;
+import com.drivingbuddy.data.model.BucketedDataResponse;
+import com.drivingbuddy.data.model.DriveDataResponse;
 import com.drivingbuddy.ui.auth.AuthViewModel;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -27,8 +33,17 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -48,6 +63,10 @@ public class HomeFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
+    private SensorDataApiService apiService;
+    private final List<DriveData> drives = new ArrayList<>();
+    private LineChart insightChart;
+    private ProgressBar progressBar;
     private AuthViewModel authViewModel;
 
     public HomeFragment() {
@@ -88,6 +107,7 @@ public class HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         String userName = authViewModel.getUserName();
+        String userEmail = authViewModel.getUserEmail();
 
 //        TextView home_title = view.findViewById(R.id.home_title);
 //        if (userName != null && !userName.isEmpty()) {
@@ -102,39 +122,29 @@ public class HomeFragment extends Fragment {
             welcomeHeader.setText("Welcome!");
         }
 
-        View insights = view.findViewById(R.id.long_term_insight_chart);
-        View.OnClickListener goToInsights = v -> {
+
+        insightChart = view.findViewById(R.id.long_term_insight_chart);
+        progressBar = view.findViewById(R.id.chart_progress_bar);
+
+        View chartContainer = view.findViewById(R.id.chart_container);
+        chartContainer.setOnClickListener(v -> {
             BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottom_nav);
             bottomNav.setSelectedItemId(R.id.insightsFragment);
-        };
-        insights.setOnClickListener(goToInsights);
-
-        List<DriveData> drives = new ArrayList<>();
-        drives.add(new DriveData("Jul 8", 0, 4, 2, 5));
-        drives.add(new DriveData("Jul 10", 2, 6, 1, 3));
-        drives.add(new DriveData("Jul 11", 5, 3, 7, 2));
-
-        LineChart insightChart = view.findViewById(R.id.long_term_insight_chart);
-
-        insightChart.setData(createCombinedInsightChart(drives));
-        insightChart.getDescription().setEnabled(false);
-        insightChart.getLegend().setEnabled(true);
-        insightChart.getAxisRight().setEnabled(false);
-
-        XAxis xAxis = insightChart.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setGranularity(1f);
-        xAxis.setDrawGridLines(false);
-        xAxis.setValueFormatter(new ValueFormatter() {
-            @Override
-            public String getFormattedValue(float value) {
-                int index = (int) value;
-                return index >= 0 && index < drives.size() ? drives.get(index).date : "";
-            }
         });
 
-        insightChart.getAxisLeft().setDrawGridLines(false);
-        insightChart.invalidate();
+        // api service setup
+        apiService = ApiClient.getClient().create(SensorDataApiService.class);
+        if ("test@gmail.com".equals(userEmail)) {
+            // show loading circle!
+            if (progressBar != null) {
+                progressBar.setVisibility(View.VISIBLE);
+            }
+            // fetch data from sensor-data collection
+            fetchDriveData();
+        } else {
+            // for demo users, show empty state!
+            showEmptyChart();
+        }
 
         // music
         View musicButton = view.findViewById(R.id.btn_start_drive_music);
@@ -192,42 +202,183 @@ public class HomeFragment extends Fragment {
 //        return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
+    private void fetchDriveData() {
+
+        Call<BucketedDataResponse> call = apiService.getBucketedData(10);
+
+        call.enqueue(new Callback<BucketedDataResponse>() {
+            @Override
+            public void onResponse(Call<BucketedDataResponse> call, Response<BucketedDataResponse> response) {
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
+
+                if (response.isSuccessful() && response.body() != null) {
+                    BucketedDataResponse data = response.body();
+                    processDriveData(data);
+                } else {
+                    Log.e("HomeFragment", "Failed to fetch data: " + response.code());
+                    showEmptyChart();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BucketedDataResponse> call, Throwable t) {
+                // Hide progress bar
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
+                Log.e("HomeFragment", "Network error: " + t.getMessage());
+                showEmptyChart();
+            }
+        });
+    }
+
+    private void processDriveData(BucketedDataResponse data) {
+        drives.clear();
+
+        // create DriveData objects
+        List<DriveData> allDrives = new ArrayList<>();
+        for (DriveDataResponse drive : data.getDrives()) {
+            String displayDate = formatDateForDisplay(drive.getDate());
+
+            // ignoring sharp turns for now
+            DriveData driveData = new DriveData(
+                    displayDate,
+                    drive.getIncidents().getSuddenBraking(),
+                    0,
+                    drive.getIncidents().getInconsistentSpeed(),
+                    drive.getIncidents().getLaneDeviation()
+            );
+            allDrives.add(driveData);
+        }
+
+        // API call returns newest first, but we want oldest first for charts
+        Collections.reverse(allDrives);
+
+        // show 5 most recent drives
+        int startIndex = Math.max(0, allDrives.size() - 5);
+        for (int i = startIndex; i < allDrives.size(); i++) {
+            drives.add(allDrives.get(i));
+        }
+
+        updateChart();
+    }
+
+    private void updateChart() {
+        insightChart.setData(createCombinedInsightChart(drives));
+        styleChart(insightChart);
+        insightChart.invalidate();
+    }
+
+    private void showEmptyChart() {
+        insightChart.setNoDataText("No driving data available yet");
+        insightChart.setNoDataTextColor(Color.GRAY);
+        insightChart.invalidate();
+    }
+
+    private String formatDateForDisplay(String dateStr) {
+        try {
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            SimpleDateFormat outputFormat = new SimpleDateFormat("MMM d", Locale.US);
+            Date date = inputFormat.parse(dateStr);
+            return outputFormat.format(date);
+        } catch (ParseException e) {
+            Log.e("HomeFragment", "Error parsing date: " + dateStr);
+            return dateStr;
+        }
+    }
+
+    private void styleChart(LineChart chart) {
+        chart.getDescription().setEnabled(false);
+        chart.getLegend().setEnabled(true);
+        chart.getLegend().setTextColor(Color.GRAY);
+        chart.getAxisRight().setEnabled(false);
+        chart.setTouchEnabled(false);
+        chart.setClickable(true);
+        chart.setFocusable(true);
+
+        chart.setViewPortOffsets(40f, 20f, 40f, 50f);
+
+        // show date range instead of individual dates
+        XAxis xAxis = chart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setGranularity(1f);
+        xAxis.setDrawGridLines(false);
+        xAxis.setDrawAxisLine(true);
+        xAxis.setAxisLineColor(Color.GRAY);
+        xAxis.setTextColor(Color.GRAY);
+        xAxis.setTextSize(10f);
+        xAxis.setLabelCount(2, true);
+        xAxis.setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                if (drives.isEmpty()) return "";
+                if (value <= 0) {
+                    return drives.get(0).date; // oldest
+                } else if (value >= drives.size() - 1) {
+                    return drives.get(drives.size() - 1).date; // newest
+                }
+                return "";
+            }
+        });
+
+        chart.getAxisLeft().setDrawGridLines(true);
+        chart.getAxisLeft().setGridColor(Color.parseColor("#E0E0E0"));
+        chart.getAxisLeft().setAxisLineColor(Color.GRAY);
+        chart.getAxisLeft().setTextColor(Color.GRAY);
+        chart.getAxisLeft().setGranularity(1f);
+        chart.getAxisLeft().setAxisMinimum(0f);
+
+        // little animation to make the graph :)
+        chart.animateY(500);
+    }
+
     private LineData createCombinedInsightChart(List<DriveData> drives) {
         List<Entry> suddenBrakingEntries = new ArrayList<>();
         List<Entry> inconsistentSpeedEntries = new ArrayList<>();
-        List<Entry> sharpTurningEntries = new ArrayList<>();
         List<Entry> laneDeviationEntries = new ArrayList<>();
 
         for (int i = 0; i < drives.size(); i++) {
             suddenBrakingEntries.add(new Entry(i, drives.get(i).sharpBraking));
             inconsistentSpeedEntries.add(new Entry(i, drives.get(i).inconsistentSpeeds));
-            sharpTurningEntries.add(new Entry(i, drives.get(i).sharpTurns));
             laneDeviationEntries.add(new Entry(i, drives.get(i).reducedLaneDeviation));
         }
 
+        // Sudden Braking
         LineDataSet suddenBrakingSet = new LineDataSet(suddenBrakingEntries, "Sudden Braking");
         suddenBrakingSet.setColor(Color.parseColor("#E76F51"));
-        suddenBrakingSet.setCircleColor(Color.parseColor("#E76F51"));
+        suddenBrakingSet.setLineWidth(2.5f);
+        suddenBrakingSet.setDrawCircles(false);
+        suddenBrakingSet.setDrawValues(false);
+        suddenBrakingSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        suddenBrakingSet.setCubicIntensity(0.2f);
 
-        LineDataSet heavyAccelSet = new LineDataSet(inconsistentSpeedEntries, "Inconsistent Speed");
-        heavyAccelSet.setColor(Color.parseColor("#2A9D8F"));
-        heavyAccelSet.setCircleColor(Color.parseColor("#2A9D8F"));
+        // Inconsistent Speed
+        LineDataSet inconsistentSpeedSet = new LineDataSet(inconsistentSpeedEntries, "Inconsistent Speed");
+        inconsistentSpeedSet.setColor(Color.parseColor("#2A9D8F"));
+        inconsistentSpeedSet.setLineWidth(2.5f);
+        inconsistentSpeedSet.setDrawCircles(false);
+        inconsistentSpeedSet.setDrawValues(false);
+        inconsistentSpeedSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        inconsistentSpeedSet.setCubicIntensity(0.2f);
 
-        LineDataSet sharpTurningSet = new LineDataSet(sharpTurningEntries, "Sharp Turning");
-        sharpTurningSet.setColor(Color.parseColor("#E9C46A"));
-        sharpTurningSet.setCircleColor(Color.parseColor("#E9C46A"));
-
+        // Lane Deviation
         LineDataSet laneDeviationSet = new LineDataSet(laneDeviationEntries, "Lane Deviation");
         laneDeviationSet.setColor(Color.parseColor("#264653"));
-        laneDeviationSet.setCircleColor(Color.parseColor("#264653"));
+        laneDeviationSet.setLineWidth(2.5f);
+        laneDeviationSet.setDrawCircles(false);
+        laneDeviationSet.setDrawValues(false);
+        laneDeviationSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        laneDeviationSet.setCubicIntensity(0.2f);
 
         LineData lineData = new LineData();
         lineData.addDataSet(suddenBrakingSet);
-        lineData.addDataSet(heavyAccelSet);
-        lineData.addDataSet(sharpTurningSet);
+        lineData.addDataSet(inconsistentSpeedSet);
         lineData.addDataSet(laneDeviationSet);
 
         return lineData;
     }
+
 
 }
