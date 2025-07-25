@@ -10,6 +10,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
+import androidx.navigation.NavOptions;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 import androidx.appcompat.widget.Toolbar;
@@ -61,7 +63,37 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (bottomNavigationView != null) {
-                NavigationUI.setupWithNavController(bottomNavigationView, navController);
+                // Replace the simple setup with custom navigation to prevent fragment recreation
+                bottomNavigationView.setOnItemSelectedListener(item -> {
+                    // Get the current destination
+                    NavDestination currentDestination = navController.getCurrentDestination();
+
+                    // If we're already on this destination, don't navigate again
+                    if (currentDestination != null && currentDestination.getId() == item.getItemId()) {
+                        return true;
+                    }
+
+                    // Navigate with options to prevent fragment recreation
+                    NavOptions navOptions = new NavOptions.Builder()
+                            .setLaunchSingleTop(true)
+                            .setRestoreState(true)
+                            .setPopUpTo(navController.getGraph().getStartDestinationId(),
+                                    false,
+                                    true) // saveState
+                            .build();
+
+                    try {
+                        navController.navigate(item.getItemId(), null, navOptions);
+                        return true;
+                    } catch (IllegalArgumentException e) {
+                        return false;
+                    }
+                });
+
+                // Handle reselection (optional - prevents accidental double taps)
+                bottomNavigationView.setOnItemReselectedListener(item -> {
+                    // Do nothing on reselection to prevent fragment recreation
+                });
             }
 
             navController.addOnDestinationChangedListener((controller, destination, arguments) -> {

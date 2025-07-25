@@ -23,4 +23,8 @@ public class Goal {
     public List<String> getTips() {
         return tips;
     }
+
+    public void setProgress(int progress) {
+        this.progress = Math.max(0, Math.min(100, progress));
+    }
 }

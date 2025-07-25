@@ -41,6 +41,10 @@ public class HomeGoalAdapter extends RecyclerView.Adapter<HomeGoalAdapter.GoalVi
     public void onBindViewHolder(@NonNull GoalViewHolder holder, int position) {
         Goal goal = goals.get(position);
         holder.title.setText(goal.getTitle());
+        if (holder.progress != null) {
+            int progressValue = goal.getProgress();
+            holder.progress.setText(progressValue + "%");
+        }
         holder.itemView.setOnClickListener(v -> listener.onGoalClick(goal));
     }
 
@@ -51,9 +55,11 @@ public class HomeGoalAdapter extends RecyclerView.Adapter<HomeGoalAdapter.GoalVi
 
     public static class GoalViewHolder extends RecyclerView.ViewHolder {
         TextView title;
+        TextView progress;
         GoalViewHolder(@NonNull View itemView) {
             super(itemView);
             title = itemView.findViewById(R.id.home_goal_title);
+            progress = itemView.findViewById(R.id.home_goal_progress);
         }
     }
 

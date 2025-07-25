@@ -5,7 +5,6 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.fragment.NavHostFragment;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,8 +15,10 @@ import android.widget.TextView;
 
 import com.drivingbuddy.data.api.ApiClient;
 import com.drivingbuddy.data.api.SensorDataApiService;
+import com.drivingbuddy.data.DrivingDataCache;
 import com.drivingbuddy.data.model.BucketedDataResponse;
 import com.drivingbuddy.data.model.DriveDataResponse;
+import com.drivingbuddy.data.model.Goal;
 import com.drivingbuddy.ui.auth.AuthViewModel;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -68,6 +69,7 @@ public class HomeFragment extends Fragment {
     private LineChart insightChart;
     private ProgressBar progressBar;
     private AuthViewModel authViewModel;
+    private List<Goal> currentGoals = new ArrayList<>();
 
     public HomeFragment() {
         // Required empty public constructor
@@ -109,11 +111,6 @@ public class HomeFragment extends Fragment {
         String userName = authViewModel.getUserName();
         String userEmail = authViewModel.getUserEmail();
 
-//        TextView home_title = view.findViewById(R.id.home_title);
-//        if (userName != null && !userName.isEmpty()) {
-//            home_title.setText(userName + "'s Statistics");
-//        }
-
         // welcome banner
         TextView welcomeHeader = view.findViewById(R.id.welcome_header);
         if (userName != null && !userName.isEmpty()) {
@@ -121,7 +118,6 @@ public class HomeFragment extends Fragment {
         } else {
             welcomeHeader.setText("Welcome!");
         }
-
 
         insightChart = view.findViewById(R.id.long_term_insight_chart);
         progressBar = view.findViewById(R.id.chart_progress_bar);
@@ -135,12 +131,18 @@ public class HomeFragment extends Fragment {
         // api service setup
         apiService = ApiClient.getClient().create(SensorDataApiService.class);
         if ("test@gmail.com".equals(userEmail)) {
-            // show loading circle!
-            if (progressBar != null) {
-                progressBar.setVisibility(View.VISIBLE);
+            BucketedDataResponse cachedData = DrivingDataCache.getCachedData();
+            if (cachedData != null) {
+                // use cached data if available
+                processDriveData(cachedData);
+            } else {
+                //show loading circle!
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.VISIBLE);
+                }
+                // fetch data from API
+                fetchDriveData();
             }
-            // fetch data from sensor-data collection
-            fetchDriveData();
         } else {
             // for demo users, show empty state!
             showEmptyChart();
@@ -159,7 +161,7 @@ public class HomeFragment extends Fragment {
                         url = "https://open.spotify.com/search/driving%20music"; // driving music search
                         break;
                     case 1: // apple music
-                        url = "https://music.apple.com/us/search?term=driving%20music"; 
+                        url = "https://music.apple.com/us/search?term=driving%20music";
                         break;
                     case 2: // soundcloud
                         url = "https://soundcloud.com/search/sets?q=driving%20music";
@@ -174,7 +176,6 @@ public class HomeFragment extends Fragment {
         });
 
         // Goals Summary
-
         RecyclerView goalRecycler = view.findViewById(R.id.home_goal_recycler);
         TextView noGoalsMessage = view.findViewById(R.id.no_goals_message);
 
@@ -193,17 +194,70 @@ public class HomeFragment extends Fragment {
                 homeGoalAdapter.setGoals(new ArrayList<>());
             } else {
                 noGoalsMessage.setVisibility(View.GONE);
+                currentGoals = goals;
+                if ("test@gmail.com".equals(userEmail)) {
+                    // Update progress if we have cached data
+                    updateGoalProgress(goals);
+                }
                 homeGoalAdapter.setGoals(goals);
             }
         });
-        return view;
 
-        // Inflate the layout for this fragment
-//        return inflater.inflate(R.layout.fragment_home, container, false);
+        return view;
+    }
+
+    private void updateGoalProgress(List<Goal> goals) {
+        // Get cached data to calculate progress
+        BucketedDataResponse cachedData = DrivingDataCache.getCachedData();
+        if (cachedData == null || goals == null) {
+            return;
+        }
+
+        // Calculate progress from cached data
+        int totalDrives = 0;
+        int goodBrakingDrives = 0;
+        int goodSpeedDrives = 0;
+        int goodLaneDeviationDrives = 0;
+
+        for (DriveDataResponse drive : cachedData.getDrives()) {
+            totalDrives++;
+
+            if (drive.getIncidents().getSuddenBraking() == 0) {
+                goodBrakingDrives++;
+            }
+            if (drive.getIncidents().getInconsistentSpeed() == 0) {
+                goodSpeedDrives++;
+            }
+            if (drive.getIncidents().getLaneDeviation() == 0) {
+                goodLaneDeviationDrives++;
+            }
+        }
+
+        // Calculate progress percentages
+        int brakingProgress = Math.min(100, goodBrakingDrives * 2);
+        int speedProgress = Math.min(100, goodSpeedDrives * 2);
+        int laneProgress = Math.min(100, goodLaneDeviationDrives * 2);
+
+        // Update each goal with its progress
+        for (Goal goal : goals) {
+            switch (goal.getTitle()) {
+                case "Reduce sudden braking":
+                    goal.setProgress(brakingProgress);
+                    break;
+                case "Reduce inconsistent speeds":
+                    goal.setProgress(speedProgress);
+                    break;
+                case "Reduce lane deviation":
+                    goal.setProgress(laneProgress);
+                    break;
+                case "Reduce sharp turns":
+                    goal.setProgress(0); // No data available
+                    break;
+            }
+        }
     }
 
     private void fetchDriveData() {
-
         Call<BucketedDataResponse> call = apiService.getBucketedData(10);
 
         call.enqueue(new Callback<BucketedDataResponse>() {
@@ -215,9 +269,9 @@ public class HomeFragment extends Fragment {
 
                 if (response.isSuccessful() && response.body() != null) {
                     BucketedDataResponse data = response.body();
+                    DrivingDataCache.setCachedData(data);
                     processDriveData(data);
                 } else {
-                    Log.e("HomeFragment", "Failed to fetch data: " + response.code());
                     showEmptyChart();
                 }
             }
@@ -228,7 +282,6 @@ public class HomeFragment extends Fragment {
                 if (progressBar != null) {
                     progressBar.setVisibility(View.GONE);
                 }
-                Log.e("HomeFragment", "Network error: " + t.getMessage());
                 showEmptyChart();
             }
         });
@@ -263,6 +316,12 @@ public class HomeFragment extends Fragment {
         }
 
         updateChart();
+
+        // update goals with progress now that we have data!
+        if (!currentGoals.isEmpty()) {
+            updateGoalProgress(currentGoals);
+            homeGoalAdapter.setGoals(currentGoals);
+        }
     }
 
     private void updateChart() {
@@ -284,7 +343,6 @@ public class HomeFragment extends Fragment {
             Date date = inputFormat.parse(dateStr);
             return outputFormat.format(date);
         } catch (ParseException e) {
-            Log.e("HomeFragment", "Error parsing date: " + dateStr);
             return dateStr;
         }
     }
@@ -379,6 +437,4 @@ public class HomeFragment extends Fragment {
 
         return lineData;
     }
-
-
 }
