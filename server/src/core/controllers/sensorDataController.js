@@ -41,6 +41,35 @@ async function importCsvToMongoDB(csvPath) {
   });
 }
 
+// a simple helper function to group incidents within 5 seconds
+function consolidateIncidents(incidents) {
+    if (!incidents || incidents.length === 0) return [];
+    
+    const consolidated = [];
+    let i = 0;
+    
+    while (i < incidents.length) {
+        const startIncident = incidents[i];
+        let j = i + 1;
+        
+        // find all incidents within 5 seconds of the start
+        while (j < incidents.length) {
+            const timeDiff = new Date(incidents[j].timestamp) - new Date(startIncident.timestamp);
+            if (timeDiff <= 5000) {
+                j++;
+            } else {
+                break;
+            }
+        }
+        
+        // group found, add as one consolidated incident
+        consolidated.push(startIncident);
+        i = j; // move to next group
+    }
+    
+    return consolidated;
+}
+
 // helper function for day suffixes!
 function getDaySuffix(day) {
     if (day >= 11 && day <= 13) {
@@ -89,8 +118,13 @@ export const getBucketedData = async (req, res) => {
                 }
             }).sort({ timestamp: 1 }).lean();
             
+            // group continuous incidents within 5 seconds
+            const consolidatedHardBraking = consolidateIncidents(hardBrakingData);
+            const consolidatedInconsistentSpeed = consolidateIncidents(inconsistentSpeedData);
+            const consolidatedLaneDeviation = consolidateIncidents(laneDeviationData);
+            
             // Check if lane deviation count is above 50, then set count to 0
-            const originalLaneDeviationCount = laneDeviationData.length;
+            const originalLaneDeviationCount = consolidatedLaneDeviation.length;
             let laneDeviationCount = originalLaneDeviationCount;
             if (originalLaneDeviationCount > 50) {
                 laneDeviationCount = 0;
@@ -108,8 +142,8 @@ export const getBucketedData = async (req, res) => {
                 date: driveDate,
                 displayDate: `July ${day}${getDaySuffix(day)}, 2025 Drive`,
                 incidents: {
-                    sudden_braking: hardBrakingData.length,
-                    inconsistent_speed: inconsistentSpeedData.length,
+                    sudden_braking: consolidatedHardBraking.length,
+                    inconsistent_speed: consolidatedInconsistentSpeed.length,
                     lane_deviation: laneDeviationCount
                 },
                 raw_data: {
@@ -119,7 +153,7 @@ export const getBucketedData = async (req, res) => {
                 }
             });
             
-            console.log(`Drive ${tripID} (${driveDate}): ${hardBrakingData.length} hard braking, ${inconsistentSpeedData.length} inconsistent speed, ${laneDeviationCount} lane deviations`);
+            console.log(`Drive ${tripID} (${driveDate}): ${consolidatedHardBraking.length} hard braking, ${consolidatedInconsistentSpeed.length} inconsistent speed, ${laneDeviationCount} lane deviations`);
         }
         
         // Sort drives by date (newest first)
