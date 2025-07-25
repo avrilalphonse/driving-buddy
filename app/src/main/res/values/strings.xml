@@ -22,6 +22,8 @@
     </string-array>
     <string name="goal_card">Goal Title</string>
 
+    <string name="profile_title">Profile Information</string>
+
     <string name="privacy_title">Data Collection/Privacy</string>
     <string name="how_we_detect">How We Detect Driving Events</string>
     <string name="back_arrow">Back</string>

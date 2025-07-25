@@ -92,6 +92,9 @@ public class TermsFragment extends androidx.fragment.app.Fragment {
                 } else if (id == R.id.menu_notif) {
                     Navigation.findNavController(view).navigate(R.id.notificationsFragment);
                     return true;
+                } else if (id == R.id.menu_profile) {
+                    Navigation.findNavController(view).navigate(R.id.profileFragment);
+                    return true;
                 } else {
                     return false;
                 }

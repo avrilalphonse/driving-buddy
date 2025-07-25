@@ -45,6 +45,9 @@ public class DataCollectionFragment extends Fragment {
                 } else if (id == R.id.menu_perms) {
                     Navigation.findNavController(view).navigate(R.id.termsFragment);
                     return true;
+                } else if (id == R.id.menu_profile) {
+                    Navigation.findNavController(view).navigate(R.id.profileFragment);
+                    return true;
                 } else {
                     return false;
                 }
