@@ -9,4 +9,8 @@ public interface SensorDataApiService {
 
     @GET("api/sensor-data/get-bucketed-data")
     Call<BucketedDataResponse> getBucketedData(@Query("windowSeconds") int windowSeconds);
+
+    @GET("api/sensor-data/get-persistent-summary")
+    Call<BucketedDataResponse> getPersistentSummaryData();
+
 }

@@ -1,6 +1,7 @@
 import fs from 'fs';
 import csv from 'csv-parser';
 import SensorData from '../models/sensorDataModel.js';
+import PersistentSummaryData from '../models/persistentSummaryDataModel.js';
 
 async function importCsvToMongoDB(csvPath) {
   const results = [];
@@ -182,3 +183,53 @@ export const getBucketedData = async (req, res) => {
 };
 export { importCsvToMongoDB };
 
+export const getPersistentSummaryData = async (req, res) => {
+    try {
+        console.log('Fetching data from persistent_summary_data collection...');
+
+        // Get all trips, sorted by start time (newest first)
+        const trips = await PersistentSummaryData.find()
+            .sort({ start_of_trip_timestamp: -1 })
+            .lean();
+
+        console.log(`Found ${trips.length} trips`);
+
+        // Format to match the BucketedDataResponse structure the app expects
+        const driveData = trips.map(trip => {
+            // Format date as YYYY-MM-DD
+            const date = new Date(trip.start_of_trip_timestamp);
+            const formattedDate = date.toISOString().split('T')[0];
+
+            return {
+                date: formattedDate,
+                incidents: {
+                    sudden_braking: trip.hard_braking?.length || 0,
+                    inconsistent_speed: trip.inconsistent_speed?.length || 0,
+                    lane_deviation: trip.lane_deviation?.length || 0,
+                    sharp_turn: trip.sharp_turning?.length || 0
+                }
+            };
+        });
+
+        // Calculate totals
+        const totals = {
+            sudden_braking: driveData.reduce((sum, drive) => sum + drive.incidents.sudden_braking, 0),
+            inconsistent_speed: driveData.reduce((sum, drive) => sum + drive.incidents.inconsistent_speed, 0),
+            lane_deviation: driveData.reduce((sum, drive) => sum + drive.incidents.lane_deviation, 0),
+            sharp_turn: driveData.reduce((sum, drive) => sum + drive.incidents.sharp_turn, 0)
+        };
+        totals.total = totals.sudden_braking + totals.inconsistent_speed + totals.lane_deviation + totals.sharp_turn;
+
+        res.json({
+            drives: driveData,
+            summary: {
+                total_drives: driveData.length,
+                ...totals
+            }
+        });
+
+    } catch (error) {
+        console.error('Error fetching persistent summary data:', error);
+        res.status(500).json({ error: 'Failed to fetch persistent summary data', details: error.message });
+    }
+};
