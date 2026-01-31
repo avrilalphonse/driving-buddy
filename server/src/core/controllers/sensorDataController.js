@@ -194,24 +194,54 @@ export const getPersistentSummaryData = async (req, res) => {
 
         console.log(`Found ${trips.length} trips`);
 
-        // Format to match the BucketedDataResponse structure the app expects
+        // Format with full trip details
         const driveData = trips.map(trip => {
-            // Format date as YYYY-MM-DD
             const date = new Date(trip.start_of_trip_timestamp);
             const formattedDate = date.toISOString().split('T')[0];
 
+            // Calculate trip duration in minutes
+            const duration = (new Date(trip.end_of_trip_timestamp) - new Date(trip.start_of_trip_timestamp)) / 1000 / 60;
+
             return {
                 date: formattedDate,
+                tripID: trip.tripID,
+                start_timestamp: trip.start_of_trip_timestamp,
+                end_timestamp: trip.end_of_trip_timestamp,
+                duration_minutes: Math.round(duration),
+                start_location: trip.start_of_trip_location,  // [lon, lat]
+                end_location: trip.end_of_trip_location,      // [lon, lat]
                 incidents: {
                     sudden_braking: trip.hard_braking?.length || 0,
                     inconsistent_speed: trip.inconsistent_speed?.length || 0,
                     lane_deviation: trip.lane_deviation?.length || 0,
                     sharp_turn: trip.sharp_turning?.length || 0
+                },
+                // Detailed incidents with location and timestamp
+                incident_details: {
+                    hard_braking: trip.hard_braking?.map(incident => ({
+                        latitude: incident[0],
+                        longitude: incident[1],
+                        timestamp: incident[2]
+                    })) || [],
+                    inconsistent_speed: trip.inconsistent_speed?.map(incident => ({
+                        latitude: incident[0],
+                        longitude: incident[1],
+                        timestamp: incident[2]
+                    })) || [],
+                    lane_deviation: trip.lane_deviation?.map(incident => ({
+                        latitude: incident[0],
+                        longitude: incident[1],
+                        timestamp: incident[2]
+                    })) || [],
+                    sharp_turning: trip.sharp_turning?.map(incident => ({
+                        latitude: incident[0],
+                        longitude: incident[1],
+                        timestamp: incident[2]
+                    })) || []
                 }
             };
         });
 
-        // Calculate totals
         const totals = {
             sudden_braking: driveData.reduce((sum, drive) => sum + drive.incidents.sudden_braking, 0),
             inconsistent_speed: driveData.reduce((sum, drive) => sum + drive.incidents.inconsistent_speed, 0),
