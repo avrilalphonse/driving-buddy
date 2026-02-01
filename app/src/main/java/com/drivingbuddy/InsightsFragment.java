@@ -61,6 +61,10 @@ public class InsightsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_insights, container, false);
 
+        // TODO: Remove this once all pages use persistent_summary_data endpoint
+        // Clear cache immediately - other pages pollute it with old sensor data
+        DrivingDataCache.setCachedData(null);
+
         String userName = authViewModel.getUserName();
         TextView insights_title = view.findViewById(R.id.insights_title);
 
@@ -130,7 +134,7 @@ public class InsightsFragment extends Fragment {
     }
 
     private void fetchDriveData(View view, LayoutInflater inflater) {
-        Call<BucketedDataResponse> call = apiService.getBucketedData(10);
+        Call<BucketedDataResponse> call = apiService.getPersistentSummaryData();
 
         call.enqueue(new Callback<BucketedDataResponse>() {
             @Override
