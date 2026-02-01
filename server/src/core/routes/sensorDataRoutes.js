@@ -1,6 +1,7 @@
 import express from 'express';
 const router = express.Router();
 import { importCsvToMongoDB, getBucketedData, getPersistentSummaryData } from '../controllers/sensorDataController.js';
+import { getAIInsights } from '../controllers/userInsightsController.js';
 import { get } from 'mongoose';
 
 // Example: POST /api/sensor-data/import
@@ -15,4 +16,5 @@ router.post('/import', async (req, res) => {
 
 router.get('/get-bucketed-data', getBucketedData)
 router.get('/get-persistent-summary', getPersistentSummaryData);
+router.get('/get-ai-insights', getAIInsights);
 export default router;
