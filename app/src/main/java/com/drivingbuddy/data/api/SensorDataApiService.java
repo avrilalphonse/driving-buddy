@@ -1,5 +1,6 @@
 package com.drivingbuddy.data.api;
 
+import com.drivingbuddy.data.model.AIInsightsResponse;
 import com.drivingbuddy.data.model.BucketedDataResponse;
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -12,4 +13,7 @@ public interface SensorDataApiService {
 
     @GET("api/sensor-data/get-persistent-summary")
     Call<BucketedDataResponse> getPersistentSummaryData();
+
+    @GET("api/sensor-data/get-ai-insights")
+    Call<AIInsightsResponse> getAIInsights(@Query("userID") String userID);
 }

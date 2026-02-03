@@ -4,6 +4,8 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -20,6 +22,7 @@ import com.drivingbuddy.data.api.SensorDataApiService;
 import com.drivingbuddy.data.DrivingDataCache;
 import com.drivingbuddy.data.model.BucketedDataResponse;
 import com.drivingbuddy.data.model.DriveDataResponse;
+import com.drivingbuddy.data.model.AIInsightsResponse;
 import com.drivingbuddy.ui.auth.AuthViewModel;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -138,7 +141,7 @@ public class InsightsFragment extends Fragment {
 
         call.enqueue(new Callback<BucketedDataResponse>() {
             @Override
-            public void onResponse(Call<BucketedDataResponse> call, Response<BucketedDataResponse> response) {
+            public void onResponse(@NonNull Call<BucketedDataResponse> call, @NonNull Response<BucketedDataResponse> response) {
                 if (progressBar != null) {
                     progressBar.setVisibility(View.GONE);
                 }
@@ -155,7 +158,7 @@ public class InsightsFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<BucketedDataResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<BucketedDataResponse> call, @NonNull Throwable t) {
                 if (progressBar != null) {
                     progressBar.setVisibility(View.GONE);
                 }
@@ -217,7 +220,38 @@ public class InsightsFragment extends Fragment {
 
     private void setupSummary(View view) {
         TextView summaryText = view.findViewById(R.id.summary_text);
-        summaryText.setText(generateSummary());
+
+        // get userID from authViewModel
+        String userID = authViewModel.getUserId();
+
+        // show loading state
+        summaryText.setText("Generating your personalized insights...");
+
+        fetchAIInsights(userID, summaryText);
+    }
+
+    private void fetchAIInsights(String userID, TextView summaryText) {
+        Call<AIInsightsResponse> call = apiService.getAIInsights(userID);
+        call.enqueue(new Callback<AIInsightsResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<AIInsightsResponse> call, @NonNull Response<AIInsightsResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    String aiSummary = response.body().getSummary();
+                    summaryText.setText("\n\n" + aiSummary);
+                } else {
+                    Log.e("InsightsFragment", "Failed to fetch AI insights: " + response.code());
+                    String generatedSummary = generateSummary();
+                    summaryText.setText("\n\n" + generatedSummary);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<AIInsightsResponse> call, @NonNull Throwable t) {
+                Log.e("InsightsFragment", "Network error fetching AI insights: " + t.getMessage());
+                String generatedSummary = generateSummary();
+                summaryText.setText("\n\n" + generatedSummary);
+            }
+        });
     }
 
     private void populateDriveCards(View view, LayoutInflater inflater) {
