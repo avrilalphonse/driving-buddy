@@ -64,10 +64,6 @@ public class InsightsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_insights, container, false);
 
-        // TODO: Remove this once all pages use persistent_summary_data endpoint
-        // Clear cache immediately - other pages pollute it with old sensor data
-        DrivingDataCache.setCachedData(null);
-
         String userName = authViewModel.getUserName();
         TextView insights_title = view.findViewById(R.id.insights_title);
 
@@ -83,19 +79,11 @@ public class InsightsFragment extends Fragment {
         // api service setup
         apiService = ApiClient.getClient().create(SensorDataApiService.class);
         if ("test@gmail.com".equals(userEmail)) {
-            BucketedDataResponse cachedData = DrivingDataCache.getCachedData();
-            if (cachedData != null) {
-                // use cached data if available
-                processDriveData(cachedData, view, inflater);
-            } else {
-                // show loading circle!
-                if (progressBar != null) {
-                    progressBar.setVisibility(View.VISIBLE);
-                }
-
-                // fetch data from API
-                fetchDriveData(view, inflater);
+            // show loading circle + fetch data
+            if (progressBar != null) {
+                progressBar.setVisibility(View.VISIBLE);
             }
+            fetchDriveData(view, inflater);
         } else {
             // for demo users, show empty state!
             showEmptyStateForDemoUser(view);
@@ -148,7 +136,7 @@ public class InsightsFragment extends Fragment {
 
                 if (response.isSuccessful() && response.body() != null) {
                     BucketedDataResponse data = response.body();
-                    DrivingDataCache.setCachedData(data);
+                    // don't cache, just process data
                     processDriveData(data, view, inflater);
                 } else {
                     Log.e("InsightsFragment", "Failed to fetch data: " + response.code());
