@@ -16,6 +16,11 @@
         android:theme="@style/Theme.DrivingBuddy"
         
         tools:targetApi="31">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyC1xI8efeePWPshJ_C-iZCkKcZ6w8SM0hM"/>
+
         <activity
             android:name="com.drivingbuddy.MainActivity"
             android:exported="true">
