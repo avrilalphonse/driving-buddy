@@ -2,6 +2,9 @@ package com.drivingbuddy.data.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+import java.util.Map;
+
 public class DriveDataResponse {
 
     @SerializedName("tripID")
@@ -15,6 +18,15 @@ public class DriveDataResponse {
 
     @SerializedName("incidents")
     private IncidentData incidents;
+
+    @SerializedName("start_location")
+    private double[] startLocation;
+
+    @SerializedName("end_location")
+    private double[] endLocation;
+
+    @SerializedName("incident_details")
+    private java.util.Map<String, List<Map<String, Object>>> incidentDetails;
 
     @SerializedName("raw_data")
 
@@ -30,6 +42,10 @@ public class DriveDataResponse {
 
     public IncidentData getIncidents() { return incidents; }
     public void setIncidents(IncidentData incidents) { this.incidents = incidents; }
+
+    public double[] getStartLocation() { return startLocation; }
+    public double[] getEndLocation() { return endLocation; }
+    public java.util.Map<String, List<java.util.Map<String, Object>>> getIncidentDetails() { return incidentDetails; }
 
     public static class IncidentData {
         @SerializedName("sudden_braking")
