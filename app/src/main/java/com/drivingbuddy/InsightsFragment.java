@@ -51,6 +51,8 @@ public class InsightsFragment extends Fragment {
     private TextView summaryText;
     private ProgressBar progressBar;
     private SensorDataApiService apiService;
+    private List<DriveDataResponse> fullDriveData = new ArrayList<>();
+    private List<com.google.android.gms.maps.MapView> mapViews = new ArrayList<>();
 
     private AuthViewModel authViewModel;
 
@@ -159,6 +161,7 @@ public class InsightsFragment extends Fragment {
 
     private void processDriveData(BucketedDataResponse data, View view, LayoutInflater inflater) {
         drives.clear();
+        fullDriveData = data.getDrives();
 
         // create DriveData objects
         List<DriveData> allDrives = new ArrayList<>();
@@ -244,20 +247,173 @@ public class InsightsFragment extends Fragment {
 
     private void populateDriveCards(View view, LayoutInflater inflater) {
         LinearLayout container = view.findViewById(R.id.past_drives_container);
-        container.removeAllViews(); // clear views
+        container.removeAllViews();
 
-        // newest drives first
-        for (int i = drives.size() - 1; i >= 0; i--) {
-            DriveData drive = drives.get(i);
-            View card = inflater.inflate(R.layout.insights_past_drive_template, container, false);
+        // clear old MapViews
+        mapViews.clear();
 
-            ((TextView) card.findViewById(R.id.drive_date)).setText("Drive on " + drive.date);
-            ((TextView) card.findViewById(R.id.sharp_braking_count)).setText(String.valueOf(drive.sharpBraking));
-            ((TextView) card.findViewById(R.id.sharp_turns_count)).setText(String.valueOf(drive.sharpTurns));
-            ((TextView) card.findViewById(R.id.inconsistent_speeds_count)).setText(String.valueOf(drive.inconsistentSpeeds));
-            ((TextView) card.findViewById(R.id.reduced_lane_deviation_count)).setText(String.valueOf(drive.reducedLaneDeviation));
+        if (fullDriveData == null || fullDriveData.isEmpty()) {
+            return;
+        }
+
+        // show 5 most recent drives (already sorted newest first)
+        int count = Math.min(5, fullDriveData.size());
+
+        for (int i = 0; i < count; i++) {
+            DriveDataResponse drive = fullDriveData.get(i);
+
+            // inflate map card
+            View card = inflater.inflate(R.layout.drive_card_map, container, false);
+
+            // set date and trip duration
+            TextView driveDate = card.findViewById(R.id.drive_date);
+            driveDate.setText("Drive on " + formatDateForDisplay(drive.getDate()));
+            TextView driveDuration = card.findViewById(R.id.drive_duration);
+            if (drive.getDurationMinutes() != null && drive.getDurationMinutes() > 0) {
+                driveDuration.setText(formatDuration(drive.getDurationMinutes()));
+            } else {
+                driveDuration.setVisibility(View.GONE);
+            }
+
+            // set incident counts
+            TextView hardBrakingCount = card.findViewById(R.id.hard_braking_count);
+            TextView sharpTurningCount = card.findViewById(R.id.sharp_turning_count);
+            TextView laneDeviationCount = card.findViewById(R.id.lane_deviation_count);
+            TextView inconsistentSpeedCount = card.findViewById(R.id.inconsistent_speed_count);
+
+            int hardBraking = drive.getIncidents().getSuddenBraking();
+            int laneDeviation = drive.getIncidents().getLaneDeviation();
+            int inconsistentSpeed = drive.getIncidents().getInconsistentSpeed();
+
+            // get sharp turning count from incident_details if available
+            int sharpTurning = 0;
+            if (drive.getIncidentDetails() != null && drive.getIncidentDetails().containsKey("sharp_turning")) {
+                List<java.util.Map<String, Object>> sharpTurns = drive.getIncidentDetails().get("sharp_turning");
+                if (sharpTurns != null) {
+                    sharpTurning = sharpTurns.size();
+                }
+            }
+
+            hardBrakingCount.setText(hardBraking + " Hard Brake" + (hardBraking != 1 ? "s" : ""));
+            sharpTurningCount.setText(sharpTurning + " Sharp Turn" + (sharpTurning != 1 ? "s" : ""));
+            laneDeviationCount.setText(laneDeviation + " Lane Shift" + (laneDeviation != 1 ? "s" : ""));
+            inconsistentSpeedCount.setText(inconsistentSpeed + " Speed Change" + (inconsistentSpeed != 1 ? "s" : ""));
+
+            // setup MapView
+            com.google.android.gms.maps.MapView mapView = card.findViewById(R.id.drive_map);
+            mapView.onCreate(null);
+
+            // track the MapView for lifecycle management
+            mapViews.add(mapView);
+
+            mapView.getMapAsync(googleMap -> {
+                setupDriveMap(googleMap, drive);
+            });
 
             container.addView(card);
+        }
+    }
+
+    private void setupDriveMap(com.google.android.gms.maps.GoogleMap googleMap, DriveDataResponse drive) {
+        if (drive.getStartLocation() == null || drive.getEndLocation() == null) {
+            return;  // no GPS data available
+        }
+
+        googleMap.getUiSettings().setAllGesturesEnabled(false);
+        googleMap.getUiSettings().setZoomControlsEnabled(false);
+
+        // start and end locations (API returns [lon, lat])
+        com.google.android.gms.maps.model.LatLng start = new com.google.android.gms.maps.model.LatLng(
+                drive.getStartLocation()[1],  // latitude
+                drive.getStartLocation()[0]   // longitude
+        );
+        com.google.android.gms.maps.model.LatLng end = new com.google.android.gms.maps.model.LatLng(
+                drive.getEndLocation()[1],
+                drive.getEndLocation()[0]
+        );
+
+        // add incident markers if available
+        if (drive.getIncidentDetails() != null) {
+            // Hard braking - RED #F44336
+            addIncidentMarkers(googleMap, drive.getIncidentDetails().get("hard_braking"),
+                    android.graphics.Color.parseColor("#F44336"));
+
+            // Sharp turning - YELLOW #FFEB3B
+            addIncidentMarkers(googleMap, drive.getIncidentDetails().get("sharp_turning"),
+                    android.graphics.Color.parseColor("#FFEB3B"));
+
+            // Lane deviation - BLUE #2196F3
+            java.util.List<java.util.Map<String, Object>> laneDeviations = drive.getIncidentDetails().get("lane_deviation");
+
+            // Inconsistent speed - ORANGE #FF9800
+            addIncidentMarkers(googleMap, drive.getIncidentDetails().get("inconsistent_speed"),
+                    android.graphics.Color.parseColor("#FF9800"));
+        }
+
+        // Calculate bounds and move camera
+        com.google.android.gms.maps.model.LatLngBounds.Builder boundsBuilder =
+                new com.google.android.gms.maps.model.LatLngBounds.Builder();
+        boundsBuilder.include(start);
+        boundsBuilder.include(end);
+        com.google.android.gms.maps.model.LatLngBounds bounds = boundsBuilder.build();
+
+        googleMap.moveCamera(com.google.android.gms.maps.CameraUpdateFactory.newLatLngBounds(bounds, 80));
+    }
+
+    private void addIncidentMarkers(com.google.android.gms.maps.GoogleMap googleMap,
+                                    java.util.List<java.util.Map<String, Object>> incidents,
+                                    int color) {
+        if (incidents == null) return;
+
+        for (java.util.Map<String, Object> incident : incidents) {
+            Double lat = (Double) incident.get("latitude");
+            Double lon = (Double) incident.get("longitude");
+            if (lat != null && lon != null) {
+                com.google.android.gms.maps.model.LatLng location =
+                        new com.google.android.gms.maps.model.LatLng(lat, lon);
+
+                // small custom marker
+                googleMap.addMarker(new com.google.android.gms.maps.model.MarkerOptions()
+                        .position(location)
+                        .icon(createSmallMarkerIcon(color))
+                        .anchor(0.5f, 0.5f)
+                        .flat(true));
+            }
+        }
+    }
+
+    private com.google.android.gms.maps.model.BitmapDescriptor createSmallMarkerIcon(int color) {
+        int size = 24;  // small marker size in pixels
+        android.graphics.Bitmap bitmap = android.graphics.Bitmap.createBitmap(size, size, android.graphics.Bitmap.Config.ARGB_8888);
+        android.graphics.Canvas canvas = new android.graphics.Canvas(bitmap);
+        android.graphics.Paint paint = new android.graphics.Paint();
+        paint.setAntiAlias(true);
+
+        // draw filled circle
+        paint.setColor(color);
+        paint.setStyle(android.graphics.Paint.Style.FILL);
+        canvas.drawCircle(size / 2f, size / 2f, (size / 2f) - 2, paint);
+
+        // draw white border
+        paint.setColor(android.graphics.Color.WHITE);
+        paint.setStyle(android.graphics.Paint.Style.STROKE);
+        paint.setStrokeWidth(3);
+        canvas.drawCircle(size / 2f, size / 2f, (size / 2f) - 2, paint);
+
+        return com.google.android.gms.maps.model.BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
+
+    private String formatDuration(int minutes) {
+        if (minutes < 60) {
+            return minutes + " min";
+        } else {
+            int hours = minutes / 60;
+            int remainingMinutes = minutes % 60;
+            if (remainingMinutes == 0) {
+                return hours + " hr";
+            } else {
+                return hours + " hr " + remainingMinutes + " min";
+            }
         }
     }
 
@@ -398,6 +554,40 @@ public class InsightsFragment extends Fragment {
             else if (i == items.size() - 2) sb.append(", and ");
         }
         return sb.toString();
+    }
+
+    // NEW: MapView lifecycle methods
+    @Override
+    public void onResume() {
+        super.onResume();
+        for (com.google.android.gms.maps.MapView mapView : mapViews) {
+            mapView.onResume();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        for (com.google.android.gms.maps.MapView mapView : mapViews) {
+            mapView.onPause();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        for (com.google.android.gms.maps.MapView mapView : mapViews) {
+            mapView.onDestroy();
+        }
+        mapViews.clear();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        for (com.google.android.gms.maps.MapView mapView : mapViews) {
+            mapView.onLowMemory();
+        }
     }
 
     // class for DriveData

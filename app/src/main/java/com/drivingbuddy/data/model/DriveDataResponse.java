@@ -28,7 +28,11 @@ public class DriveDataResponse {
     @SerializedName("incident_details")
     private java.util.Map<String, List<Map<String, Object>>> incidentDetails;
 
+    @SerializedName("duration_minutes")
+    private Integer durationMinutes;
+
     @SerializedName("raw_data")
+    private Object rawData;
 
     // Getters and setters
     public String getTripId() { return tripId; }
@@ -36,6 +40,13 @@ public class DriveDataResponse {
 
     public String getDate() { return date; }
     public void setDate(String date) { this.date = date; }
+
+    public Object getRawData() { return rawData; }
+
+    public Integer getDurationMinutes() { return durationMinutes; }
+    public void setDurationMinutes(Integer durationMinutes) {
+        this.durationMinutes = durationMinutes;
+    }
 
     public String getDisplayDate() { return displayDate; }
     public void setDisplayDate(String displayDate) { this.displayDate = displayDate; }
