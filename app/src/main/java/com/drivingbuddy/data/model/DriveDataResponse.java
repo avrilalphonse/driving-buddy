@@ -2,6 +2,9 @@ package com.drivingbuddy.data.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+import java.util.Map;
+
 public class DriveDataResponse {
 
     @SerializedName("tripID")
@@ -16,7 +19,20 @@ public class DriveDataResponse {
     @SerializedName("incidents")
     private IncidentData incidents;
 
+    @SerializedName("start_location")
+    private double[] startLocation;
+
+    @SerializedName("end_location")
+    private double[] endLocation;
+
+    @SerializedName("incident_details")
+    private java.util.Map<String, List<Map<String, Object>>> incidentDetails;
+
+    @SerializedName("duration_minutes")
+    private Integer durationMinutes;
+
     @SerializedName("raw_data")
+    private Object rawData;
 
     // Getters and setters
     public String getTripId() { return tripId; }
@@ -25,11 +41,22 @@ public class DriveDataResponse {
     public String getDate() { return date; }
     public void setDate(String date) { this.date = date; }
 
+    public Object getRawData() { return rawData; }
+
+    public Integer getDurationMinutes() { return durationMinutes; }
+    public void setDurationMinutes(Integer durationMinutes) {
+        this.durationMinutes = durationMinutes;
+    }
+
     public String getDisplayDate() { return displayDate; }
     public void setDisplayDate(String displayDate) { this.displayDate = displayDate; }
 
     public IncidentData getIncidents() { return incidents; }
     public void setIncidents(IncidentData incidents) { this.incidents = incidents; }
+
+    public double[] getStartLocation() { return startLocation; }
+    public double[] getEndLocation() { return endLocation; }
+    public java.util.Map<String, List<java.util.Map<String, Object>>> getIncidentDetails() { return incidentDetails; }
 
     public static class IncidentData {
         @SerializedName("sudden_braking")
