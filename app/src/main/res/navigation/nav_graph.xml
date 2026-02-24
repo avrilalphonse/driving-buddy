@@ -60,6 +60,11 @@
         android:label="@string/notifs_title" />
 
     <fragment
+        android:id="@+id/carDetailsFragment"
+        android:name="com.drivingbuddy.ui.settings.CarDetailsFragment"
+        android:label="@string/car_details_title" />
+
+    <fragment
         android:id="@+id/termsFragment"
         android:name="com.drivingbuddy.ui.settings.TermsFragment"
         android:label="@string/perms_title" />

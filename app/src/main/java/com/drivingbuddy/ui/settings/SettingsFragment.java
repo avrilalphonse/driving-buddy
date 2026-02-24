@@ -69,6 +69,11 @@ public class SettingsFragment extends Fragment {
             navController.navigate(R.id.notificationsFragment);
         });
 
+        View carDetailsContainer = view.findViewById(R.id.car_details_container);
+        carDetailsContainer.setOnClickListener(v -> {
+            navController.navigate(R.id.carDetailsFragment);
+        });
+
         View termsContainer = view.findViewById(R.id.permissions_container);
         termsContainer.setOnClickListener(v -> {
             navController.navigate(R.id.termsFragment);

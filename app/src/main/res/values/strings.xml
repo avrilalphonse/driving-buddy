@@ -33,4 +33,36 @@
     <string name="perms_title">Terms and Conditions</string>
     <string name="logout">Logout</string>
 
+    <string name="car_details_title">Car Details</string>
+    <string name="car_make">Make</string>
+    <string name="car_model">Model</string>
+    <string name="car_color">Color</string>
+    <string name="save_car_details">Save Car Details</string>
+    <string name="car_details_saved">Car details saved</string>
+    <string name="car_details_menu">Car Details</string>
+    <string name="car_section_title">Your Car</string>
+    <string name="car_prompt">Add your car details in Settings to see your 3D model.</string>
+
+    <string-array name="car_make_options">
+        <item>Honda</item>
+        <item>Toyota</item>
+        <item>Mini</item>
+        <item>Generic</item>
+    </string-array>
+
+    <string-array name="car_model_options">
+        <item>Civic</item>
+        <item>Corolla Cross</item>
+        <item>Cooper</item>
+        <item>SUV</item>
+        <item>Sedan</item>
+    </string-array>
+
+    <string-array name="car_color_options">
+        <item>Blue</item>
+        <item>White</item>
+        <item>Grey</item>
+        <item>Black</item>
+    </string-array>
+
 </resources>
