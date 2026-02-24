@@ -2,9 +2,12 @@ package com.drivingbuddy.ui.home;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.net.Uri;
 
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,6 +15,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.webkit.ConsoleMessage;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.webkit.WebResourceResponse;
+import androidx.webkit.WebViewAssetLoader;
 
 import com.drivingbuddy.data.api.ApiClient;
 import com.drivingbuddy.data.api.SensorDataApiService;
@@ -19,6 +29,7 @@ import com.drivingbuddy.data.DrivingDataCache;
 import com.drivingbuddy.data.model.BucketedDataResponse;
 import com.drivingbuddy.data.model.DriveDataResponse;
 import com.drivingbuddy.data.model.Goal;
+import com.drivingbuddy.data.model.CarProfile;
 import com.drivingbuddy.ui.auth.AuthViewModel;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -26,6 +37,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.drivingbuddy.DriveData;
 import com.drivingbuddy.R;
 import com.drivingbuddy.ui.goals.GoalViewModel;
+import com.drivingbuddy.utils.CarModelMapper;
+import com.drivingbuddy.utils.TokenManager;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -36,6 +49,11 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLConnection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -69,8 +87,11 @@ public class HomeFragment extends Fragment {
     private final List<DriveData> drives = new ArrayList<>();
     private LineChart insightChart;
     private ProgressBar progressBar;
+    private WebView carWebView;
+    private TextView carPrompt;
     private AuthViewModel authViewModel;
     private List<Goal> currentGoals = new ArrayList<>();
+    private View rootView;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -108,6 +129,7 @@ public class HomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
+        rootView = view;
 
         String userName = authViewModel.getUserName();
         String userEmail = authViewModel.getUserEmail();
@@ -122,6 +144,8 @@ public class HomeFragment extends Fragment {
 
         insightChart = view.findViewById(R.id.long_term_insight_chart);
         progressBar = view.findViewById(R.id.chart_progress_bar);
+        carWebView = view.findViewById(R.id.car_web_view);
+        carPrompt = view.findViewById(R.id.car_prompt);
 
         View chartContainer = view.findViewById(R.id.chart_container);
         chartContainer.setOnClickListener(v -> {
@@ -204,7 +228,104 @@ public class HomeFragment extends Fragment {
             }
         });
 
+        setupCarViewer(view);
+
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (rootView != null) {
+            setupCarViewer(rootView);
+        }
+    }
+
+    private void setupCarViewer(View view) {
+        TokenManager tokenManager = new TokenManager(requireContext());
+        CarProfile carProfile = tokenManager.getCarProfile();
+        if (carProfile == null) {
+            carWebView.setVisibility(View.GONE);
+            carPrompt.setVisibility(View.VISIBLE);
+            carPrompt.setOnClickListener(v -> {
+                NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
+                navController.navigate(R.id.carDetailsFragment);
+            });
+            return;
+        }
+
+        carPrompt.setVisibility(View.GONE);
+        carWebView.setVisibility(View.VISIBLE);
+
+        WebSettings settings = carWebView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setAllowFileAccess(true);
+        settings.setAllowContentAccess(true);
+        settings.setAllowFileAccessFromFileURLs(true);
+        settings.setAllowUniversalAccessFromFileURLs(true);
+        WebViewAssetLoader.PathHandler assetsHandler = path -> {
+            try {
+                String assetPath = path;
+                if (assetPath.startsWith("/")) {
+                    assetPath = assetPath.substring(1);
+                }
+                if (assetPath.startsWith("assets/")) {
+                    assetPath = assetPath.substring("assets/".length());
+                }
+                InputStream inputStream = requireContext().getAssets().open(assetPath);
+                String mimeType;
+                if (assetPath.endsWith(".js")) {
+                    mimeType = "application/javascript";
+                } else if (assetPath.endsWith(".html")) {
+                    mimeType = "text/html";
+                } else if (assetPath.endsWith(".glb")) {
+                    mimeType = "model/gltf-binary";
+                } else {
+                    mimeType = URLConnection.guessContentTypeFromName(assetPath);
+                    if (mimeType == null) {
+                        mimeType = "application/octet-stream";
+                    }
+                }
+                WebResourceResponse response = new WebResourceResponse(mimeType, "UTF-8", inputStream);
+                response.setStatusCodeAndReasonPhrase(200, "OK");
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Access-Control-Allow-Origin", "*");
+                headers.put("Access-Control-Allow-Methods", "GET");
+                headers.put("Access-Control-Allow-Headers", "Content-Type");
+                response.setResponseHeaders(headers);
+                return response;
+            } catch (IOException e) {
+                Log.d("CarWebView", "Asset load failed: " + path + " (" + e.getMessage() + ")");
+                return null;
+            }
+        };
+        WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
+                .addPathHandler("/assets/", assetsHandler)
+                .build();
+        carWebView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                Log.d("CarWebView", consoleMessage.message() + " @"
+                        + consoleMessage.sourceId() + ":" + consoleMessage.lineNumber());
+                return true;
+            }
+        });
+        carWebView.setWebViewClient(new WebViewClient() {
+            @Override
+            public android.webkit.WebResourceResponse shouldInterceptRequest(WebView view, android.webkit.WebResourceRequest request) {
+                Log.d("CarWebView", "Intercept: " + request.getUrl());
+                return assetLoader.shouldInterceptRequest(request.getUrl());
+            }
+        });
+
+        String modelPath = CarModelMapper.getModelAsset(carProfile.getMake(), carProfile.getModel());
+        String modelUrl = "https://appassets.androidplatform.net/assets/" + modelPath;
+        String url = "https://appassets.androidplatform.net/assets/car_viewer.html?model="
+                + Uri.encode(modelUrl, ":/")
+                + "&color="
+                + Uri.encode(carProfile.getColorHex());
+        carWebView.loadUrl(url);
     }
 
     private void updateGoalProgress(List<Goal> goals) {

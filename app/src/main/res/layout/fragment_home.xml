@@ -46,6 +46,29 @@
 
         </LinearLayout>
 
+        <!-- Car Viewer -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="240dp"
+            android:layout_marginBottom="16dp"
+            android:background="?attr/selectableItemBackground">
+
+            <WebView
+                android:id="@+id/car_web_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <TextView
+                android:id="@+id/car_prompt"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/car_prompt"
+                android:textColor="?attr/colorOnBackground"
+                android:gravity="center"
+                android:padding="16dp"
+                android:visibility="gone" />
+        </FrameLayout>
+
         <!-- Long Term Insight Summary -->
         <TextView
             android:id="@+id/long_term_insight_summary"
