@@ -68,17 +68,6 @@ public class CarDetailsFragment extends Fragment {
             setSpinnerSelection(colorSpinner, existing.getColorName());
         }
 
-        makeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                modelSpinner.setSelection(position);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
-
         saveButton.setOnClickListener(v -> {
             String make = makeSpinner.getSelectedItem().toString();
             String model = modelSpinner.getSelectedItem().toString();

@@ -21,6 +21,7 @@ import com.drivingbuddy.data.model.BucketedDataResponse;
 import com.drivingbuddy.data.model.DriveDataResponse;
 import com.drivingbuddy.data.model.Goal;
 import com.drivingbuddy.ui.auth.AuthViewModel;
+import com.drivingbuddy.utils.GoalProgressCalculator;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -55,6 +56,7 @@ public class GoalsFragment extends Fragment {
     );
 
     private final Map<String, Integer> goalProgress = new HashMap<>();
+    private boolean hasEnoughData = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -112,14 +114,7 @@ public class GoalsFragment extends Fragment {
         goalViewModel = new ViewModelProvider(this).get(GoalViewModel.class);
 
         // fetch data from sensor-data collection
-        if (userEmail != null && userEmail.equals("test@gmail.com")) {
-            BucketedDataResponse cachedData = DrivingDataCache.getCachedData();
-            if (cachedData != null) {
-                calculateProgressFromData(cachedData);
-            } else {
-                fetchDrivingDataAndUpdateProgress();
-            }
-        }
+        fetchDrivingDataAndUpdateProgress();
 
         reloadGoalsFromBackend();
 
@@ -141,6 +136,7 @@ public class GoalsFragment extends Fragment {
                     if (progress != null) {
                         goal.setProgress(progress);
                     }
+                    goal.setHasEnoughData(hasEnoughData);
                     goals.add(goal);
                     goalAdapter.notifyItemInserted(goals.size() - 1);
                     Toast.makeText(getContext(), "Goal added!", Toast.LENGTH_SHORT).show();
@@ -167,7 +163,7 @@ public class GoalsFragment extends Fragment {
                         goal.setProgress(progress);
                     } else {
                     }
-
+                    goal.setHasEnoughData(hasEnoughData);
                     goals.add(goal);
                 }
             }
@@ -187,7 +183,7 @@ public class GoalsFragment extends Fragment {
     }
 
     private void fetchDrivingDataAndUpdateProgress() {
-        Call<BucketedDataResponse> call = apiService.getBucketedData(10);
+        Call<BucketedDataResponse> call = apiService.getPersistentSummaryData();
 
         call.enqueue(new Callback<BucketedDataResponse>() {
             @Override
@@ -209,39 +205,14 @@ public class GoalsFragment extends Fragment {
     }
 
     private void calculateProgressFromData(BucketedDataResponse data) {
-        // init counters
-        int totalDrives = 0;
-        int goodBrakingDrives = 0;
-        int goodSpeedDrives = 0;
-        int goodLaneDeviationDrives = 0;
-
-        // count of drives with good behavior (0 incidents)
-        for (DriveDataResponse drive : data.getDrives()) {
-            totalDrives++;
-
-            if (drive.getIncidents().getSuddenBraking() == 0) {
-                goodBrakingDrives++;
-            }
-            if (drive.getIncidents().getInconsistentSpeed() == 0) {
-                goodSpeedDrives++;
-            }
-            if (drive.getIncidents().getLaneDeviation() == 0) {
-                goodLaneDeviationDrives++;
-            }
+        if (data == null) {
+            return;
         }
 
-        // calc progress (2% per good drive, max 100%)
-        int brakingProgress = Math.min(100, goodBrakingDrives * 2);
-        int speedProgress = Math.min(100, goodSpeedDrives * 2);
-        int laneProgress = Math.min(100, goodLaneDeviationDrives * 2);
-
-        // store progress values
-        goalProgress.put("Reduce sudden braking", brakingProgress);
-        goalProgress.put("Reduce sharp turns", 0); // No data available
-        goalProgress.put("Reduce inconsistent speeds", speedProgress);
-        goalProgress.put("Reduce lane deviation", laneProgress);
-
-        // update existing goals with new progress
+        goalProgress.clear();
+        GoalProgressCalculator.Result result = GoalProgressCalculator.calculate(data.getDrives());
+        goalProgress.putAll(result.getProgress());
+        hasEnoughData = result.hasEnoughData();
         updateGoalsWithProgress();
     }
 
@@ -251,6 +222,7 @@ public class GoalsFragment extends Fragment {
             if (progress != null) {
                 goal.setProgress(progress);
             }
+            goal.setHasEnoughData(hasEnoughData);
         }
 
         // notify adapter to refresh the views

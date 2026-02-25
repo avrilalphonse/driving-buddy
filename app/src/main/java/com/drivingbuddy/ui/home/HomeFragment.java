@@ -20,6 +20,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.content.Context;
 import android.webkit.WebResourceResponse;
 import androidx.webkit.WebViewAssetLoader;
 
@@ -38,6 +39,7 @@ import com.drivingbuddy.DriveData;
 import com.drivingbuddy.R;
 import com.drivingbuddy.ui.goals.GoalViewModel;
 import com.drivingbuddy.utils.CarModelMapper;
+import com.drivingbuddy.utils.GoalProgressCalculator;
 import com.drivingbuddy.utils.TokenManager;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -59,6 +61,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -264,6 +267,7 @@ public class HomeFragment extends Fragment {
         settings.setAllowContentAccess(true);
         settings.setAllowFileAccessFromFileURLs(true);
         settings.setAllowUniversalAccessFromFileURLs(true);
+        Context appContext = requireContext().getApplicationContext();
         WebViewAssetLoader.PathHandler assetsHandler = path -> {
             try {
                 String assetPath = path;
@@ -273,7 +277,7 @@ public class HomeFragment extends Fragment {
                 if (assetPath.startsWith("assets/")) {
                     assetPath = assetPath.substring("assets/".length());
                 }
-                InputStream inputStream = requireContext().getAssets().open(assetPath);
+                InputStream inputStream = appContext.getAssets().open(assetPath);
                 String mimeType;
                 if (assetPath.endsWith(".js")) {
                     mimeType = "application/javascript";
@@ -334,48 +338,14 @@ public class HomeFragment extends Fragment {
         if (cachedData == null || goals == null) {
             return;
         }
-
-        // Calculate progress from cached data
-        int totalDrives = 0;
-        int goodBrakingDrives = 0;
-        int goodSpeedDrives = 0;
-        int goodLaneDeviationDrives = 0;
-
-        for (DriveDataResponse drive : cachedData.getDrives()) {
-            totalDrives++;
-
-            if (drive.getIncidents().getSuddenBraking() == 0) {
-                goodBrakingDrives++;
-            }
-            if (drive.getIncidents().getInconsistentSpeed() == 0) {
-                goodSpeedDrives++;
-            }
-            if (drive.getIncidents().getLaneDeviation() == 0) {
-                goodLaneDeviationDrives++;
-            }
-        }
-
-        // Calculate progress percentages
-        int brakingProgress = Math.min(100, goodBrakingDrives * 2);
-        int speedProgress = Math.min(100, goodSpeedDrives * 2);
-        int laneProgress = Math.min(100, goodLaneDeviationDrives * 2);
-
-        // Update each goal with its progress
+        GoalProgressCalculator.Result result = GoalProgressCalculator.calculate(cachedData.getDrives());
+        Map<String, Integer> progress = result.getProgress();
         for (Goal goal : goals) {
-            switch (goal.getTitle()) {
-                case "Reduce sudden braking":
-                    goal.setProgress(brakingProgress);
-                    break;
-                case "Reduce inconsistent speeds":
-                    goal.setProgress(speedProgress);
-                    break;
-                case "Reduce lane deviation":
-                    goal.setProgress(laneProgress);
-                    break;
-                case "Reduce sharp turns":
-                    goal.setProgress(0); // No data available
-                    break;
+            Integer value = progress.get(goal.getTitle());
+            if (value != null) {
+                goal.setProgress(value);
             }
+            goal.setHasEnoughData(result.hasEnoughData());
         }
     }
 
