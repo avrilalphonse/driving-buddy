@@ -190,7 +190,6 @@ public class GoalsFragment extends Fragment {
             public void onResponse(Call<BucketedDataResponse> call, Response<BucketedDataResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     BucketedDataResponse data = response.body();
-                    DrivingDataCache.setCachedData(data);
                     calculateProgressFromData(data);
                 } else {
                     Log.e("GoalsFragment", "Failed to fetch driving data");
