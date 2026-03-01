@@ -350,7 +350,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void fetchDriveData() {
-        Call<BucketedDataResponse> call = apiService.getBucketedData(10);
+        Call<BucketedDataResponse> call = apiService.getPersistentSummaryData();
 
         call.enqueue(new Callback<BucketedDataResponse>() {
             @Override
