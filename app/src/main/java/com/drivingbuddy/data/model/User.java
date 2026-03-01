@@ -4,6 +4,7 @@ public class User {
     private String id;
     private String name;
     private String email;
+    private String profilePictureUrl;
 
     public String getId() {
         return id;
@@ -16,4 +17,9 @@ public class User {
     public String getEmail() {
         return email;
     }
+
+    public String getProfilePictureUrl() { 
+        return profilePictureUrl; 
+    }
+
 }

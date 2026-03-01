@@ -39,6 +39,18 @@ public class AuthViewModel extends AndroidViewModel{
         return authRepository.getUserId();
     }
 
+    public LiveData<AuthResponse> getMe() {
+        return authRepository.getMe();
+    }
+
+    public LiveData<AuthResponse> uploadProfilePhoto(java.io.File imageFile) {
+        return authRepository.uploadProfilePhoto(imageFile);
+    }
+
+    public String getProfilePictureUrl() {
+        return authRepository.getProfilePictureUrl();
+    }
+
     public void logout() {
         authRepository.logout();
     }

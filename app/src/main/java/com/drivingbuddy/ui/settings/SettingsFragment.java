@@ -10,6 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.ImageView;
+import com.bumptech.glide.Glide;
 
 import com.drivingbuddy.MainActivity;
 import com.drivingbuddy.R;
@@ -38,7 +40,8 @@ public class SettingsFragment extends Fragment {
 
         TextView profile_title = view.findViewById(R.id.profile_title);
         TextView nameTextView = view.findViewById(R.id.profile_name);
-
+        ImageView profileImage = view.findViewById(R.id.profile_image); 
+        
         if (userName != null && !userName.isEmpty()) {
             profile_title.setText(userName + "'s Profile");
             nameTextView.setText(userName);
@@ -46,9 +49,28 @@ public class SettingsFragment extends Fragment {
             nameTextView.setText("Guest");
         }
 
+        String photoUrl = authViewModel.getProfilePictureUrl();
+
+        if (photoUrl != null && !photoUrl.isEmpty()) {
+            Glide.with(this)
+                .load(photoUrl)
+                .circleCrop()
+                .into(profileImage);
+        } else {
+            profileImage.setImageResource(R.drawable.ic_badge);
+        }
+
         View profile = view.findViewById(R.id.profile_info_container);
         profile.setOnClickListener(v -> {
             navController.navigate(R.id.profileFragment);
+        });
+
+        authViewModel.getMe().observe(getViewLifecycleOwner(), response -> {
+            if (response != null && response.getUser() != null &&
+                    response.getUser().getProfilePictureUrl() != null) {
+                String url = response.getUser().getProfilePictureUrl();
+                Glide.with(this).load(url).circleCrop().into(profileImage);
+            }
         });
 
         navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);

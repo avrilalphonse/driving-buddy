@@ -2,12 +2,20 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import User from '../models/userModel.js';
 import config from '../../config/index.js';
+import admin from '../../config/firebase.js';
 
 const generateToken = (user) => {
   return jwt.sign({ id: user._id }, config.jwtSecret, {
     expiresIn: config.jwtExpiresIn,
   });
 };
+
+const toUserResponse = (user) => ({
+  id: user._id,
+  email: user.email,
+  name: user.name,
+  profilePictureUrl: user.profilePictureUrl || null,
+});
 
 /**
  * @desc Create a new user
@@ -51,4 +59,40 @@ const login = async (req, res) => {
   }
 };
 
-export { signup, login };
+/**
+ * @desc Upload profile picture; store in Firebase Storage, save URL in MongoDB
+ * @route POST /api/auth/me/photo
+ */
+const uploadProfilePhoto = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'No file uploaded' });
+  }
+
+  try {
+    const userId = req.user._id.toString();
+    const bucket = admin.storage().bucket();
+    const filename = `profile_pictures/${userId}_${Date.now()}.jpg`;
+    const file = bucket.file(filename);
+
+    await file.save(req.file.buffer, {
+      metadata: { contentType: req.file.mimetype || 'image/jpeg' },
+    });
+
+    const publicUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(
+      filename
+    )}?alt=media`;
+
+    await User.findByIdAndUpdate(userId, { profilePictureUrl: publicUrl }, { new: true });
+    req.user.profilePictureUrl = publicUrl;
+
+    return res.status(200).json({
+      profilePictureUrl: publicUrl,
+      user: toUserResponse(req.user),
+    });
+  } catch (err) {
+    console.error('Profile photo upload failed', err);
+    res.status(500).json({ message: 'Profile photo upload failed', error: err.message });
+  }
+};
+
+export { signup, login, uploadProfilePhoto };

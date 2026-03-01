@@ -17,6 +17,11 @@ import retrofit2.Response;
 import androidx.annotation.NonNull;
 
 import java.io.IOException;
+import java.io.File;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 
 public class AuthRepository {
 
@@ -103,8 +108,75 @@ public class AuthRepository {
         return tokenManager.getUserId();
     }
 
+    public String getProfilePictureUrl() {
+        return tokenManager.getProfilePictureUrl();
+    }
+
+    public LiveData<AuthResponse> getMe() {
+        MutableLiveData<AuthResponse> liveData = new MutableLiveData<>();
+        String token = tokenManager.getToken();
+        if (token == null) {
+            liveData.setValue(null);
+            return liveData;
+        }
+        String authHeader = "Bearer " + token;
+
+        apiService.getMe(authHeader).enqueue(new Callback<AuthResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<AuthResponse> call, @NonNull Response<AuthResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getUser() != null) {
+                    tokenManager.saveUser(response.body().getUser());
+                    liveData.setValue(response.body());
+                } else {
+                    liveData.setValue(null);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<AuthResponse> call, @NonNull Throwable t) {
+                liveData.setValue(null);
+            }
+        });
+
+        return liveData;
+    }
+
+    public LiveData<AuthResponse> uploadProfilePhoto(File imageFile) {
+        MutableLiveData<AuthResponse> liveData = new MutableLiveData<>();
+        String token = tokenManager.getToken();
+        if (token == null) {
+            liveData.setValue(null);
+            return liveData;
+        }
+        String authHeader = "Bearer " + token;
+
+        RequestBody requestFile =
+                RequestBody.create(imageFile, MediaType.parse("image/jpeg"));
+
+        MultipartBody.Part body =
+                MultipartBody.Part.createFormData("photo", imageFile.getName(), requestFile);
+
+        apiService.uploadProfilePhoto(authHeader, body).enqueue(new Callback<AuthResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<AuthResponse> call, @NonNull Response<AuthResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getUser() != null) {
+                    tokenManager.saveUser(response.body().getUser());
+                    liveData.setValue(response.body());
+                } else {
+                    liveData.setValue(null);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<AuthResponse> call, @NonNull Throwable t) {
+                liveData.setValue(null);
+            }
+        });
+
+        return liveData;
+    }
+
     public void logout() {
         tokenManager.clearAll();
     }
-
 }
