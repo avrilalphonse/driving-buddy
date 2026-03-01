@@ -96,7 +96,7 @@ public class ProfileFragment extends Fragment {
         }
 
         ImageView avatar = view.findViewById(R.id.profile_avatar);
-        ImageButton avatarChange = view.findViewById(R.id.profile_avatar_change);
+        ImageView avatarChange = view.findViewById(R.id.profile_avatar_change);
 
         String photoUrl = authViewModel.getProfilePictureUrl();
         if (photoUrl != null && !photoUrl.isEmpty()) {
@@ -109,7 +109,7 @@ public class ProfileFragment extends Fragment {
         }
 
         avatarChange.setOnClickListener(v ->
-                imagePickerLauncher.launch("image/*")
+            imagePickerLauncher.launch("image/*")
         );
 
         return view;
