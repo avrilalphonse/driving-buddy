@@ -100,10 +100,10 @@ public class TokenManager {
                 .remove("user_email")
                 .remove("user_id")
                 .remove(USER_PROFILE_PHOTO_URL_KEY)
-                .remove(CAR_MAKE_KEY)
-                .remove(CAR_MODEL_KEY)
-                .remove(CAR_COLOR_NAME_KEY)
-                .remove(CAR_COLOR_HEX_KEY)
+                .remove(CAR_MAKE_KEY + "_" + getUserId())
+                .remove(CAR_MODEL_KEY + "_" + getUserId())
+                .remove(CAR_COLOR_NAME_KEY + "_" + getUserId())
+                .remove(CAR_COLOR_HEX_KEY + "_" + getUserId())
                 .apply();
     }
 
