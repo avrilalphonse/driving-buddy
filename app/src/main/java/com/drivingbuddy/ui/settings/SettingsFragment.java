@@ -10,14 +10,32 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.ImageView;
+import android.net.Uri;
+import android.view.MotionEvent;
+import com.bumptech.glide.Glide;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 import com.drivingbuddy.MainActivity;
 import com.drivingbuddy.R;
 import com.drivingbuddy.ui.auth.AuthViewModel;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+
 public class SettingsFragment extends Fragment {
     private NavController navController;
     private AuthViewModel authViewModel;
+
+    private final ActivityResultLauncher<String> imagePickerLauncher =
+        registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+            if (uri != null) {
+                uploadImageFromUri(uri);
+            }
+        });
 
     public SettingsFragment() {
         // Required empty public constructor
@@ -38,6 +56,10 @@ public class SettingsFragment extends Fragment {
 
         TextView profile_title = view.findViewById(R.id.profile_title);
         TextView nameTextView = view.findViewById(R.id.profile_name);
+        ImageView profileImage = view.findViewById(R.id.profile_image); 
+        ImageView profileImageChange = view.findViewById(R.id.edit_profile_image);
+        ImageView profile = view.findViewById(R.id.pencil_icon);
+        View settingsContainer = view.findViewById(R.id.settings_container); 
 
         if (userName != null && !userName.isEmpty()) {
             profile_title.setText(userName + "'s Profile");
@@ -46,9 +68,42 @@ public class SettingsFragment extends Fragment {
             nameTextView.setText("Guest");
         }
 
-        View profile = view.findViewById(R.id.profile_info_container);
+        String photoUrl = authViewModel.getProfilePictureUrl();
+
+        if (photoUrl != null && !photoUrl.isEmpty()) {
+            Glide.with(this)
+                .load(photoUrl)
+                .circleCrop()
+                .into(profileImage);
+        } else {
+            profileImage.setImageResource(R.drawable.ic_badge);
+        }
+
+        profileImage.setOnClickListener(v -> {
+            profileImageChange.setVisibility(View.VISIBLE);
+        });
+
+        profileImageChange.setOnClickListener(v ->
+            imagePickerLauncher.launch("image/*")
+        );
+
+        settingsContainer.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                profileImageChange.setVisibility(View.INVISIBLE);
+            }
+            return false;
+        });
+
         profile.setOnClickListener(v -> {
             navController.navigate(R.id.profileFragment);
+        });
+
+        authViewModel.getMe().observe(getViewLifecycleOwner(), response -> {
+            if (response != null && response.getUser() != null &&
+                    response.getUser().getProfilePictureUrl() != null) {
+                String url = response.getUser().getProfilePictureUrl();
+                Glide.with(this).load(url).circleCrop().into(profileImage);
+            }
         });
 
         navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
@@ -81,4 +136,49 @@ public class SettingsFragment extends Fragment {
 
         return view;
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        View root = getView();
+        if (root != null) {
+            ImageView edit = root.findViewById(R.id.edit_profile_image);
+            if (edit != null) {
+                edit.setVisibility(View.INVISIBLE);
+            }
+        }
+    }
+
+    private void uploadImageFromUri(Uri uri) {
+        try {
+            File tempFile = File.createTempFile("profile_photo", ".jpg", requireContext().getCacheDir());
+            try (InputStream in = requireContext().getContentResolver().openInputStream(uri);
+                 FileOutputStream out = new FileOutputStream(tempFile)) {
+
+                if (in == null) return;
+
+                byte[] buffer = new byte[8192];
+                int len;
+                while ((len = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, len);
+                }
+            }
+
+            authViewModel.uploadProfilePhoto(tempFile)
+                    .observe(getViewLifecycleOwner(), response -> {
+                        if (response != null && response.getUser() != null &&
+                                response.getUser().getProfilePictureUrl() != null) {
+                            String newUrl = response.getUser().getProfilePictureUrl();
+                            ImageView profileImage = requireView().findViewById(R.id.profile_image);
+                            Glide.with(this)
+                                    .load(newUrl)
+                                    .circleCrop()
+                                    .into(profileImage);
+                        }
+                    });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    } 
 }

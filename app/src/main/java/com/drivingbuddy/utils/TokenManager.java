@@ -11,6 +11,7 @@ public class TokenManager {
     private static final String CAR_MODEL_KEY = "car_model";
     private static final String CAR_COLOR_NAME_KEY = "car_color_name";
     private static final String CAR_COLOR_HEX_KEY = "car_color_hex";
+    private static final String USER_PROFILE_PHOTO_URL_KEY = "user_profile_picture_url";
 
     public TokenManager(Context context) {
         this.prefs = context.getSharedPreferences(AuthPrefs.PREFS_NAME, Context.MODE_PRIVATE);
@@ -24,10 +25,16 @@ public class TokenManager {
         return prefs.getString(AuthPrefs.TOKEN_KEY, null);
     }
 
+    public String getProfilePictureUrl() {
+        String url = prefs.getString(USER_PROFILE_PHOTO_URL_KEY, null);
+        return (url != null && !url.isEmpty()) ? url : null;
+    }
+
     public void saveUser(User user) {
         prefs.edit().putString("user_id", user.getId())
                 .putString("user_name", user.getName())
                 .putString("user_email", user.getEmail())
+                .putString(USER_PROFILE_PHOTO_URL_KEY, user.getProfilePictureUrl() != null ? user.getProfilePictureUrl() : "")
                 .apply();
     }
 
@@ -71,6 +78,7 @@ public class TokenManager {
         prefs.edit().remove("user_name")
                 .remove("user_email")
                 .remove("user_id")
+                .remove(USER_PROFILE_PHOTO_URL_KEY)
                 .apply();
     }
 

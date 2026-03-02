@@ -1,6 +1,7 @@
 import express from 'express';
 import { createServer } from 'http';
 import connectDB from './config/db.js';
+import './config/firebase.js';
 import config from './config/index.js';
 import authRoutes from './core/routes/authRoutes.js';
 import sensorDataRoutes from './core/routes/sensorDataRoutes.js';
