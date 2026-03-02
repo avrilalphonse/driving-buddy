@@ -105,6 +105,7 @@ public class AuthRepository {
 
     public void logout() {
         tokenManager.clearAll();
+        com.drivingbuddy.data.DrivingDataCache.clearCache();
     }
 
 }

@@ -95,6 +95,7 @@ public class HomeFragment extends Fragment {
     private AuthViewModel authViewModel;
     private List<Goal> currentGoals = new ArrayList<>();
     private View rootView;
+    private String currentUserId;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -136,6 +137,7 @@ public class HomeFragment extends Fragment {
 
         String userName = authViewModel.getUserName();
         String userID = authViewModel.getUserId();
+        currentUserId = userID;
 
         // welcome banner
         TextView welcomeHeader = view.findViewById(R.id.welcome_header);
@@ -159,7 +161,7 @@ public class HomeFragment extends Fragment {
         // api service setup
         apiService = ApiClient.getClient().create(SensorDataApiService.class);
         if (userID != null && !userID.isEmpty()) {
-            BucketedDataResponse cachedData = DrivingDataCache.getCachedData();
+            BucketedDataResponse cachedData = DrivingDataCache.getCachedData(userID);
             if (cachedData != null) {
                 // use cached data if available
                 processDriveData(cachedData);
@@ -331,7 +333,10 @@ public class HomeFragment extends Fragment {
 
     private void updateGoalProgress(List<Goal> goals) {
         // Get cached data to calculate progress
-        BucketedDataResponse cachedData = DrivingDataCache.getCachedData();
+        if (currentUserId == null || currentUserId.isEmpty()) {
+            return;
+        }
+        BucketedDataResponse cachedData = DrivingDataCache.getCachedData(currentUserId);
         if (cachedData == null || goals == null) {
             return;
         }
@@ -358,7 +363,7 @@ public class HomeFragment extends Fragment {
 
                 if (response.isSuccessful() && response.body() != null) {
                     BucketedDataResponse data = response.body();
-                    DrivingDataCache.setCachedData(data);
+                    DrivingDataCache.setCachedData(data, userID);
                     processDriveData(data);
                 } else {
                     showEmptyChart();
