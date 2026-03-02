@@ -15,6 +15,7 @@ const toUserResponse = (user) => ({
   email: user.email,
   name: user.name,
   profilePictureUrl: user.profilePictureUrl || null,
+  carDetails: user.carDetails || null
 });
 
 /**
@@ -31,7 +32,7 @@ const signup = async (req, res) => {
     const newUser = await User.create({ email, name, password: hashedPassword });
 
     const token = generateToken(newUser);
-    res.status(201).json({ token, user: { id: newUser._id, email, name } });
+    res.status(201).json({ token, user: toUserResponse(newUser) });
 
   } catch (err) {
     res.status(500).json({ message: 'Signup failed', error: err.message });
@@ -52,7 +53,7 @@ const login = async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
     const token = generateToken(user);
-    res.status(200).json({ token, user: { id: user._id, email, name: user.name } });
+    res.status(200).json({ token, user: toUserResponse(user) });
 
   } catch (err) {
     res.status(500).json({ message: 'Login failed', error: err.message });
@@ -158,4 +159,33 @@ const changePassword = async (req, res) => {
   }
 };
 
-export { signup, login, uploadProfilePhoto, updateProfile, changePassword };
+/**
+ * @desc Update current user's car details
+ * @route PATCH /api/auth/me/car
+ */
+const updateCarDetails = async (req, res) => {
+  const userId = req.user._id;
+  const { make, model, colorName, colorHex } = req.body;
+
+  if (!make || !model || !colorName || !colorHex) {
+    return res
+      .status(400)
+      .json({ message: 'make, model, colorName, and colorHex are required' });
+  }
+
+  try {
+    const updated = await User.findByIdAndUpdate(
+      userId,
+      { carDetails: { make, model, colorName, colorHex } },
+      { new: true }
+    ).select('-password');
+
+    return res.status(200).json({ user: toUserResponse(updated) });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ message: 'Car details update failed', error: err.message });
+  }
+};
+
+export { signup, login, uploadProfilePhoto, updateProfile, changePassword, updateCarDetails };

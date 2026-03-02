@@ -3,6 +3,7 @@ package com.drivingbuddy.data.api;
 import com.drivingbuddy.data.model.LoginRequest;
 import com.drivingbuddy.data.model.SignupRequest;
 import com.drivingbuddy.data.model.AuthResponse;
+import com.drivingbuddy.data.model.UpdateCarDetailsRequest;
 import com.drivingbuddy.data.model.UpdateProfileRequest;
 import com.drivingbuddy.data.model.ChangePasswordRequest;
 import retrofit2.Call;
@@ -38,4 +39,8 @@ public interface AuthApiService {
     @POST("api/auth/me/change-password")
     Call<AuthResponse> changePassword(@Header("Authorization") String authorization,
         @Body ChangePasswordRequest changePasswordRequest);
+
+    @PATCH("api/auth/me/car")
+    Call<AuthResponse> updateCarDetails(@Header("Authorization") String authorization,
+        @Body UpdateCarDetailsRequest updateCarDetailsRequest);
 }

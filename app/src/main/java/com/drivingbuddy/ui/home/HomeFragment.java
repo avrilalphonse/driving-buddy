@@ -40,7 +40,6 @@ import com.drivingbuddy.R;
 import com.drivingbuddy.ui.goals.GoalViewModel;
 import com.drivingbuddy.utils.CarModelMapper;
 import com.drivingbuddy.utils.GoalProgressCalculator;
-import com.drivingbuddy.utils.TokenManager;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -244,8 +243,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupCarViewer(View view) {
-        TokenManager tokenManager = new TokenManager(requireContext());
-        CarProfile carProfile = tokenManager.getCarProfile();
+        CarProfile carProfile = authViewModel.getCarProfile();
         if (carProfile == null) {
             carWebView.setVisibility(View.GONE);
             carPrompt.setVisibility(View.VISIBLE);

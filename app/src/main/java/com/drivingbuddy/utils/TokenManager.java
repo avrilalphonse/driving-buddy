@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.drivingbuddy.data.model.User;
+import com.drivingbuddy.data.model.CarProfile;
 
 public class TokenManager {
     private final SharedPreferences prefs;
@@ -36,22 +37,42 @@ public class TokenManager {
                 .putString("user_email", user.getEmail())
                 .putString(USER_PROFILE_PHOTO_URL_KEY, user.getProfilePictureUrl() != null ? user.getProfilePictureUrl() : "")
                 .apply();
+
+        if (user.getCarDetails() != null) {
+            CarProfile car = user.getCarDetails();
+            saveCarProfile(car.getMake(), car.getModel(), car.getColorName(), car.getColorHex());
+        }
+    }
+
+    private String getCarKey(String baseKey) {
+        String userId = getUserId();
+        return baseKey + "_" + userId;
     }
 
     public void saveCarProfile(String make, String model, String colorName, String colorHex) {
+        String makeKey = getCarKey(CAR_MAKE_KEY);
+        String modelKey = getCarKey(CAR_MODEL_KEY);
+        String colorNameKey = getCarKey(CAR_COLOR_NAME_KEY);
+        String colorHexKey = getCarKey(CAR_COLOR_HEX_KEY);
+
         prefs.edit()
-                .putString(CAR_MAKE_KEY, make)
-                .putString(CAR_MODEL_KEY, model)
-                .putString(CAR_COLOR_NAME_KEY, colorName)
-                .putString(CAR_COLOR_HEX_KEY, colorHex)
-                .apply();
+            .putString(makeKey, make)
+            .putString(modelKey, model)
+            .putString(colorNameKey, colorName)
+            .putString(colorHexKey, colorHex)
+            .apply();
     }
 
     public com.drivingbuddy.data.model.CarProfile getCarProfile() {
-        String make = prefs.getString(CAR_MAKE_KEY, null);
-        String model = prefs.getString(CAR_MODEL_KEY, null);
-        String colorName = prefs.getString(CAR_COLOR_NAME_KEY, null);
-        String colorHex = prefs.getString(CAR_COLOR_HEX_KEY, null);
+        String makeKey = getCarKey(CAR_MAKE_KEY);
+        String modelKey = getCarKey(CAR_MODEL_KEY);
+        String colorNameKey = getCarKey(CAR_COLOR_NAME_KEY);
+        String colorHexKey = getCarKey(CAR_COLOR_HEX_KEY);
+
+        String make = prefs.getString(makeKey, null);
+        String model = prefs.getString(modelKey, null);
+        String colorName = prefs.getString(colorNameKey, null);
+        String colorHex = prefs.getString(colorHexKey, null);
         if (make == null || model == null || colorName == null || colorHex == null) {
             return null;
         }
@@ -79,6 +100,10 @@ public class TokenManager {
                 .remove("user_email")
                 .remove("user_id")
                 .remove(USER_PROFILE_PHOTO_URL_KEY)
+                .remove(CAR_MAKE_KEY)
+                .remove(CAR_MODEL_KEY)
+                .remove(CAR_COLOR_NAME_KEY)
+                .remove(CAR_COLOR_HEX_KEY)
                 .apply();
     }
 

@@ -5,6 +5,7 @@ public class User {
     private String name;
     private String email;
     private String profilePictureUrl;
+    private CarProfile carDetails;
 
     public String getId() {
         return id;
@@ -22,4 +23,7 @@ public class User {
         return profilePictureUrl; 
     }
 
+    public CarProfile getCarDetails() {
+        return carDetails;
+    }
 }

@@ -4,7 +4,8 @@ import {
     login,
     uploadProfilePhoto,
     updateProfile,
-    changePassword
+    changePassword,
+    updateCarDetails
 } from '../controllers/authController.js';
 import protect from '../middleware/authMiddleware.js';
 import { uploadSinglePhoto } from '../middleware/uploadMiddleware.js';
@@ -15,14 +16,15 @@ router.post('/signup', signup);
 router.post('/login', login);
 
 router.get('/me', protect, (req, res) => {
-  const { _id, email, name, profilePictureUrl } = req.user;
+  const { _id, email, name, profilePictureUrl, carDetails } = req.user;
   res.status(200).json({
-    user: { id: _id, email, name, profilePictureUrl: profilePictureUrl || null },
+    user: { id: _id, email, name, profilePictureUrl: profilePictureUrl || null, carDetails: carDetails || null },
   });
 });
 
 router.patch('/me', protect, updateProfile);
 router.post('/me/change-password', protect, changePassword);
 router.post('/me/photo', protect, uploadSinglePhoto, uploadProfilePhoto);
+router.patch('/me/car', protect, updateCarDetails);
 
 export default router;

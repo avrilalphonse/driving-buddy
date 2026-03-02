@@ -14,15 +14,26 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.drivingbuddy.R;
 import com.drivingbuddy.data.model.CarProfile;
 import com.drivingbuddy.utils.TokenManager;
+import com.drivingbuddy.ui.auth.AuthViewModel;
+import com.drivingbuddy.data.model.AuthResponse;
 
 public class CarDetailsFragment extends Fragment {
 
+    private AuthViewModel authViewModel;
+
     public CarDetailsFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        authViewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
     }
 
     @Override
@@ -60,8 +71,7 @@ public class CarDetailsFragment extends Fragment {
         colorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         colorSpinner.setAdapter(colorAdapter);
 
-        TokenManager tokenManager = new TokenManager(requireContext());
-        CarProfile existing = tokenManager.getCarProfile();
+        CarProfile existing = authViewModel.getCarProfile();
         if (existing != null) {
             setSpinnerSelection(makeSpinner, existing.getMake());
             setSpinnerSelection(modelSpinner, existing.getModel());
@@ -73,9 +83,16 @@ public class CarDetailsFragment extends Fragment {
             String model = modelSpinner.getSelectedItem().toString();
             String colorName = colorSpinner.getSelectedItem().toString();
             String colorHex = mapColorNameToHex(colorName);
-            tokenManager.saveCarProfile(make, model, colorName, colorHex);
-            Toast.makeText(requireContext(), R.string.car_details_saved, Toast.LENGTH_SHORT).show();
-            requireActivity().onBackPressed();
+
+            authViewModel.updateCarDetails(make, model, colorName, colorHex)
+                .observe(getViewLifecycleOwner(), authResponse -> {
+                    if (authResponse != null && authResponse.getUser() != null) {
+                        Toast.makeText(requireContext(), R.string.car_details_saved, Toast.LENGTH_SHORT).show();
+                        requireActivity().onBackPressed();
+                    } else {
+                        Toast.makeText(requireContext(), "Update failed", Toast.LENGTH_SHORT).show();
+                    }
+                });
         });
 
         backButton.setOnClickListener(v -> requireActivity().onBackPressed());
