@@ -70,7 +70,6 @@ public class GoalsFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_goals, container, false);
 
         String userName = authViewModel.getUserName();
-        String userEmail = authViewModel.getUserEmail();
 
         TextView goals_title = root.findViewById(R.id.goals_title);
         if (userName != null && !userName.isEmpty()) {
@@ -183,7 +182,12 @@ public class GoalsFragment extends Fragment {
     }
 
     private void fetchDrivingDataAndUpdateProgress() {
-        Call<BucketedDataResponse> call = apiService.getPersistentSummaryData();
+        String userID = authViewModel.getUserId();
+        if (userID == null || userID.isEmpty()) {
+            Log.w("GoalsFragment", "Missing user ID; skipping driving data fetch.");
+            return;
+        }
+        Call<BucketedDataResponse> call = apiService.getPersistentSummaryData(userID);
 
         call.enqueue(new Callback<BucketedDataResponse>() {
             @Override

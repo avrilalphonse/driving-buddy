@@ -28,6 +28,16 @@
                 android:textSize="26sp" />
 
             <!-- Graphs Grid -->
+            <TextView
+                android:id="@+id/show_all_charts_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:text="Show all"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="14sp"
+                android:padding="6dp" />
+
             <GridLayout
                 android:id="@+id/insights_graphs_grid"
                 android:layout_width="match_parent"
@@ -212,6 +222,20 @@
                     android:textColor="@color/onSurface"
                     android:textSize="16sp"
                     android:layout_marginStart="12dp"/>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/show_all_drives_toggle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Show all"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="14sp"
+                    android:padding="6dp" />
             </LinearLayout>
 
             <!-- Past Drives List -->

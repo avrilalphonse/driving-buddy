@@ -47,12 +47,18 @@ import retrofit2.Response;
 public class InsightsFragment extends Fragment {
 
     private final List<DriveData> drives = new ArrayList<>();
+    private final List<DriveData> allChartDrives = new ArrayList<>();
     private LinearLayout drivesContainer;
     private TextView summaryText;
     private ProgressBar progressBar;
     private SensorDataApiService apiService;
     private List<DriveDataResponse> fullDriveData = new ArrayList<>();
     private List<com.google.android.gms.maps.MapView> mapViews = new ArrayList<>();
+    private TextView showAllChartsToggle;
+    private TextView showAllDrivesToggle;
+    private boolean showAllCharts = false;
+    private boolean showAllDriveCards = false;
+    private View rootView;
 
     private AuthViewModel authViewModel;
 
@@ -65,11 +71,10 @@ public class InsightsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_insights, container, false);
+        rootView = view;
 
         String userName = authViewModel.getUserName();
         TextView insights_title = view.findViewById(R.id.insights_title);
-
-        String userEmail = authViewModel.getUserEmail();
         if (userName != null && !userName.isEmpty()) {
             insights_title.setText(userName + "'s Insights");
         }
@@ -77,15 +82,24 @@ public class InsightsFragment extends Fragment {
         drivesContainer = view.findViewById(R.id.past_drives_container);
         summaryText = view.findViewById(R.id.summary_text);
         progressBar = view.findViewById(R.id.progress_bar);
+        showAllChartsToggle = view.findViewById(R.id.show_all_charts_toggle);
+        showAllDrivesToggle = view.findViewById(R.id.show_all_drives_toggle);
+        if (showAllChartsToggle != null) {
+            showAllChartsToggle.setOnClickListener(v -> toggleShowAllCharts());
+        }
+        if (showAllDrivesToggle != null) {
+            showAllDrivesToggle.setOnClickListener(v -> toggleShowAllDriveCards());
+        }
 
         // api service setup
         apiService = ApiClient.getClient().create(SensorDataApiService.class);
-        if ("test@gmail.com".equals(userEmail)) {
+        String userID = authViewModel.getUserId();
+        if (userID != null && !userID.isEmpty()) {
             // show loading circle + fetch data
             if (progressBar != null) {
                 progressBar.setVisibility(View.VISIBLE);
             }
-            fetchDriveData(view, inflater);
+            fetchDriveData(userID, view, inflater);
         } else {
             // for demo users, show empty state!
             showEmptyStateForDemoUser(view);
@@ -102,6 +116,9 @@ public class InsightsFragment extends Fragment {
 
         // clear data
         drives.clear();
+        allChartDrives.clear();
+        updateShowAllChartsToggle();
+        updateShowAllDrivesToggle();
 
         // blank summary
         TextView summaryText = view.findViewById(R.id.summary_text);
@@ -126,8 +143,8 @@ public class InsightsFragment extends Fragment {
         chart.invalidate();
     }
 
-    private void fetchDriveData(View view, LayoutInflater inflater) {
-        Call<BucketedDataResponse> call = apiService.getPersistentSummaryData();
+    private void fetchDriveData(String userID, View view, LayoutInflater inflater) {
+        Call<BucketedDataResponse> call = apiService.getPersistentSummaryData(userID);
 
         call.enqueue(new Callback<BucketedDataResponse>() {
             @Override
@@ -182,11 +199,11 @@ public class InsightsFragment extends Fragment {
         // API call returns newest first, but we want oldest first for charts
         Collections.reverse(allDrives);
 
-        // show 5 most recent drives
-        int startIndex = Math.max(0, allDrives.size() - 5);
-        for (int i = startIndex; i < allDrives.size(); i++) {
-            drives.add(allDrives.get(i));
-        }
+        allChartDrives.clear();
+        allChartDrives.addAll(allDrives);
+        applyChartWindow();
+        updateShowAllChartsToggle();
+        updateShowAllDrivesToggle();
 
         updateUI(view, inflater);
     }
@@ -197,6 +214,61 @@ public class InsightsFragment extends Fragment {
         setupCharts(view);
     }
 
+    private void updateShowAllChartsToggle() {
+        if (showAllChartsToggle == null) {
+            return;
+        }
+        if (allChartDrives.size() <= 5) {
+            showAllChartsToggle.setVisibility(View.GONE);
+            return;
+        }
+        showAllChartsToggle.setVisibility(View.VISIBLE);
+        showAllChartsToggle.setText(showAllCharts ? "Show recent" : "Show all");
+    }
+
+    private void updateShowAllDrivesToggle() {
+        if (showAllDrivesToggle == null) {
+            return;
+        }
+        if (fullDriveData == null || fullDriveData.size() <= 5) {
+            showAllDrivesToggle.setVisibility(View.GONE);
+            return;
+        }
+        showAllDrivesToggle.setVisibility(View.VISIBLE);
+        showAllDrivesToggle.setText(showAllDriveCards ? "Show recent" : "Show all");
+    }
+
+    private void applyChartWindow() {
+        drives.clear();
+        if (allChartDrives.isEmpty()) {
+            return;
+        }
+        if (showAllCharts || allChartDrives.size() <= 5) {
+            drives.addAll(allChartDrives);
+            return;
+        }
+        int startIndex = Math.max(0, allChartDrives.size() - 5);
+        drives.addAll(allChartDrives.subList(startIndex, allChartDrives.size()));
+    }
+
+    private void toggleShowAllCharts() {
+        showAllCharts = !showAllCharts;
+        applyChartWindow();
+        updateShowAllChartsToggle();
+        View view = rootView != null ? rootView : getView();
+        if (view != null) {
+            setupCharts(view);
+        }
+    }
+
+    private void toggleShowAllDriveCards() {
+        showAllDriveCards = !showAllDriveCards;
+        updateShowAllDrivesToggle();
+        View view = rootView != null ? rootView : getView();
+        if (view != null) {
+            populateDriveCards(view, getLayoutInflater());
+        }
+    }
     private String formatDateForDisplay(String dateStr) {
         try {
             SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
@@ -256,8 +328,8 @@ public class InsightsFragment extends Fragment {
             return;
         }
 
-        // show 5 most recent drives (already sorted newest first)
-        int count = Math.min(5, fullDriveData.size());
+        // show recent or all drives (already sorted newest first)
+        int count = showAllDriveCards ? fullDriveData.size() : Math.min(5, fullDriveData.size());
 
         for (int i = 0; i < count; i++) {
             DriveDataResponse drive = fullDriveData.get(i);

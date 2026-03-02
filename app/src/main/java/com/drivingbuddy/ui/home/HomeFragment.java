@@ -135,7 +135,7 @@ public class HomeFragment extends Fragment {
         rootView = view;
 
         String userName = authViewModel.getUserName();
-        String userEmail = authViewModel.getUserEmail();
+        String userID = authViewModel.getUserId();
 
         // welcome banner
         TextView welcomeHeader = view.findViewById(R.id.welcome_header);
@@ -158,7 +158,7 @@ public class HomeFragment extends Fragment {
 
         // api service setup
         apiService = ApiClient.getClient().create(SensorDataApiService.class);
-        if ("test@gmail.com".equals(userEmail)) {
+        if (userID != null && !userID.isEmpty()) {
             BucketedDataResponse cachedData = DrivingDataCache.getCachedData();
             if (cachedData != null) {
                 // use cached data if available
@@ -169,10 +169,9 @@ public class HomeFragment extends Fragment {
                     progressBar.setVisibility(View.VISIBLE);
                 }
                 // fetch data from API
-                fetchDriveData();
+                fetchDriveData(userID);
             }
         } else {
-            // for demo users, show empty state!
             showEmptyChart();
         }
 
@@ -223,10 +222,8 @@ public class HomeFragment extends Fragment {
             } else {
                 noGoalsMessage.setVisibility(View.GONE);
                 currentGoals = goals;
-                if ("test@gmail.com".equals(userEmail)) {
-                    // Update progress if we have cached data
-                    updateGoalProgress(goals);
-                }
+                // Update progress if we have cached data
+                updateGoalProgress(goals);
                 homeGoalAdapter.setGoals(goals);
             }
         });
@@ -349,8 +346,8 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    private void fetchDriveData() {
-        Call<BucketedDataResponse> call = apiService.getPersistentSummaryData();
+    private void fetchDriveData(String userID) {
+        Call<BucketedDataResponse> call = apiService.getPersistentSummaryData(userID);
 
         call.enqueue(new Callback<BucketedDataResponse>() {
             @Override
