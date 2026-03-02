@@ -1,10 +1,13 @@
 package com.drivingbuddy.data.model;
 
 public class CarProfile {
-    private final String make;
-    private final String model;
-    private final String colorName;
-    private final String colorHex;
+    private String make;
+    private String model;
+    private String colorName;
+    private String colorHex;
+
+    public CarProfile() {
+    }
 
     public CarProfile(String make, String model, String colorName, String colorHex) {
         this.make = make;

@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.*;
 import com.drivingbuddy.data.model.AuthResponse;
 import com.drivingbuddy.data.repository.AuthRepository;
+import com.drivingbuddy.data.model.CarProfile;
 
 public class AuthViewModel extends AndroidViewModel{
 
@@ -49,6 +50,22 @@ public class AuthViewModel extends AndroidViewModel{
 
     public String getProfilePictureUrl() {
         return authRepository.getProfilePictureUrl();
+    }
+
+    public LiveData<AuthResponse> updateProfile(String name, String email) {
+        return authRepository.updateProfile(name, email);
+    }
+
+    public LiveData<AuthResponse> changePassword(String newPassword) {
+        return authRepository.changePassword(newPassword);
+    }
+    
+    public CarProfile getCarProfile() {
+        return authRepository.getCarProfile();
+    }
+
+    public LiveData<AuthResponse> updateCarDetails(String make, String model, String colorName, String colorHex) {
+        return authRepository.updateCarDetails(make, model, colorName, colorHex);
     }
 
     public void logout() {

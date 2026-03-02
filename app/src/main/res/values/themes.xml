@@ -1,6 +1,17 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="ThemeOverlay.DrivingBuddy.Dialog"
+        parent="ThemeOverlay.Material3.MaterialAlertDialog">
+
+        <item name="android:fontFamily">@font/my_font</item>
+    </style>
+    
     <style name="Base.Theme.DrivingBuddy" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:fontFamily">@font/my_font</item>
+
+        <item name="materialAlertDialogTheme">
+            @style/ThemeOverlay.DrivingBuddy.Dialog
+        </item>
+        
         <!-- Primary brand color -->
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryVariant">@color/primaryVariant</item>
@@ -27,4 +38,6 @@
     </style>
 
     <style name="Theme.DrivingBuddy" parent="Base.Theme.DrivingBuddy" />
+
+
 </resources>

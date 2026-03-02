@@ -15,6 +15,7 @@ const toUserResponse = (user) => ({
   email: user.email,
   name: user.name,
   profilePictureUrl: user.profilePictureUrl || null,
+  carDetails: user.carDetails || null
 });
 
 /**
@@ -31,7 +32,7 @@ const signup = async (req, res) => {
     const newUser = await User.create({ email, name, password: hashedPassword });
 
     const token = generateToken(newUser);
-    res.status(201).json({ token, user: { id: newUser._id, email, name } });
+    res.status(201).json({ token, user: toUserResponse(newUser) });
 
   } catch (err) {
     res.status(500).json({ message: 'Signup failed', error: err.message });
@@ -52,7 +53,7 @@ const login = async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
     const token = generateToken(user);
-    res.status(200).json({ token, user: { id: user._id, email, name: user.name } });
+    res.status(200).json({ token, user: toUserResponse(user) });
 
   } catch (err) {
     res.status(500).json({ message: 'Login failed', error: err.message });
@@ -95,4 +96,96 @@ const uploadProfilePhoto = async (req, res) => {
   }
 };
 
-export { signup, login, uploadProfilePhoto };
+/**
+ * @desc Update current user's name and/or email
+ * @route PATCH /api/auth/me
+ */
+const updateProfile = async (req, res) => {
+  const { name, email } = req.body;
+  const userId = req.user._id;
+
+  try {
+    const updates = {};
+
+    if (name != null && name.trim() !== '') {
+      updates.name = name.trim();
+    }
+
+    if (email != null && email.trim() !== '') {
+      const normalizedEmail = email.trim();
+      const existing = await User.findOne({ email: normalizedEmail });
+
+      if (existing && existing._id.toString() !== userId.toString()) {
+        return res.status(400).json({ message: 'Email already in use' });
+      }
+
+      updates.email = normalizedEmail;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ message: 'No valid fields to update' });
+    }
+
+    const updated = await User.findByIdAndUpdate(userId, updates, { new: true }).select('-password');
+    return res.status(200).json({ user: toUserResponse(updated) });
+  } catch (err) {
+    res.status(500).json({ message: 'Profile update failed', error: err.message });
+  }
+};
+
+/**
+ * @desc Change current user's password
+ * @route POST /api/auth/me/change-password
+ */
+const changePassword = async (req, res) => {
+  const { newPassword } = req.body;
+  const userId = req.user._id;
+
+  if (!newPassword) {
+    return res.status(400).json({ message: 'New password required' });
+  }
+  if (newPassword.length < 6) {
+    return res.status(400).json({ message: 'New password must be at least 6 characters' });
+  }
+
+  try {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await User.findByIdAndUpdate(userId, { password: hashedPassword });
+
+    const updated = await User.findById(userId).select('-password');
+    return res.status(200).json({ user: toUserResponse(updated) });
+  } catch (err) {
+    res.status(500).json({ message: 'Password change failed', error: err.message });
+  }
+};
+
+/**
+ * @desc Update current user's car details
+ * @route PATCH /api/auth/me/car
+ */
+const updateCarDetails = async (req, res) => {
+  const userId = req.user._id;
+  const { make, model, colorName, colorHex } = req.body;
+
+  if (!make || !model || !colorName || !colorHex) {
+    return res
+      .status(400)
+      .json({ message: 'make, model, colorName, and colorHex are required' });
+  }
+
+  try {
+    const updated = await User.findByIdAndUpdate(
+      userId,
+      { carDetails: { make, model, colorName, colorHex } },
+      { new: true }
+    ).select('-password');
+
+    return res.status(200).json({ user: toUserResponse(updated) });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ message: 'Car details update failed', error: err.message });
+  }
+};
+
+export { signup, login, uploadProfilePhoto, updateProfile, changePassword, updateCarDetails };
