@@ -389,11 +389,10 @@ public class HomeFragment extends Fragment {
         for (DriveDataResponse drive : data.getDrives()) {
             String displayDate = formatDateForDisplay(drive.getDate());
 
-            // ignoring sharp turns for now
             DriveData driveData = new DriveData(
                     displayDate,
                     drive.getIncidents().getSuddenBraking(),
-                    0,
+                    drive.getIncidents().getSharpTurning(),
                     drive.getIncidents().getInconsistentSpeed(),
                     drive.getIncidents().getLaneDeviation()
             );
@@ -487,11 +486,13 @@ public class HomeFragment extends Fragment {
         List<Entry> suddenBrakingEntries = new ArrayList<>();
         List<Entry> inconsistentSpeedEntries = new ArrayList<>();
         List<Entry> laneDeviationEntries = new ArrayList<>();
+        List<Entry> sharpTurningEntries = new ArrayList<>();
 
         for (int i = 0; i < drives.size(); i++) {
             suddenBrakingEntries.add(new Entry(i, drives.get(i).sharpBraking));
             inconsistentSpeedEntries.add(new Entry(i, drives.get(i).inconsistentSpeeds));
             laneDeviationEntries.add(new Entry(i, drives.get(i).reducedLaneDeviation));
+            sharpTurningEntries.add(new Entry(i, drives.get(i).sharpTurns));
         }
 
         boolean singlePoint = drives.size() <= 1;
@@ -538,10 +539,26 @@ public class HomeFragment extends Fragment {
         laneDeviationSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
         laneDeviationSet.setCubicIntensity(0.2f);
 
+        // Sharp Turning
+        LineDataSet sharpTurningSet = new LineDataSet(sharpTurningEntries, "Sharp Turning");
+        sharpTurningSet.setColor(Color.parseColor("#F9A825"));
+        sharpTurningSet.setLineWidth(2.5f);
+        sharpTurningSet.setDrawCircles(singlePoint);
+        if (singlePoint) {
+            sharpTurningSet.setCircleRadius(3.5f);
+            sharpTurningSet.setCircleColor(Color.parseColor("#F9A825"));
+            sharpTurningSet.setDrawCircleHole(false);
+        }
+        sharpTurningSet.setDrawValues(false);
+        sharpTurningSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        sharpTurningSet.setCubicIntensity(0.2f);
+
+
         LineData lineData = new LineData();
         lineData.addDataSet(suddenBrakingSet);
         lineData.addDataSet(inconsistentSpeedSet);
         lineData.addDataSet(laneDeviationSet);
+        lineData.addDataSet(sharpTurningSet);
 
         return lineData;
     }
