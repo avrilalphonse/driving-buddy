@@ -2,7 +2,9 @@ import express from 'express';
 import {
     signup,
     login,
-    uploadProfilePhoto
+    uploadProfilePhoto,
+    updateProfile,
+    changePassword
 } from '../controllers/authController.js';
 import protect from '../middleware/authMiddleware.js';
 import { uploadSinglePhoto } from '../middleware/uploadMiddleware.js';
@@ -19,6 +21,8 @@ router.get('/me', protect, (req, res) => {
   });
 });
 
+router.patch('/me', protect, updateProfile);
+router.post('/me/change-password', protect, changePassword);
 router.post('/me/photo', protect, uploadSinglePhoto, uploadProfilePhoto);
 
 export default router;

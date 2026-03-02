@@ -8,8 +8,10 @@ import androidx.lifecycle.MutableLiveData;
 import com.drivingbuddy.data.api.ApiClient;
 import com.drivingbuddy.data.api.AuthApiService;
 import com.drivingbuddy.data.model.AuthResponse;
+import com.drivingbuddy.data.model.ChangePasswordRequest;
 import com.drivingbuddy.data.model.LoginRequest;
 import com.drivingbuddy.data.model.SignupRequest;
+import com.drivingbuddy.data.model.UpdateProfileRequest;
 import com.drivingbuddy.utils.TokenManager;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -172,6 +174,68 @@ public class AuthRepository {
                 liveData.setValue(null);
             }
         });
+
+        return liveData;
+    }
+
+    public LiveData<AuthResponse> updateProfile(String name, String email) {
+        MutableLiveData<AuthResponse> liveData = new MutableLiveData<>();
+        String token = tokenManager.getToken();
+        if (token == null) {
+            liveData.setValue(null);
+            return liveData;
+        }
+
+        String authHeader = "Bearer " + token;
+
+        apiService.updateProfile(authHeader, new UpdateProfileRequest(name, email))
+                .enqueue(new Callback<AuthResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<AuthResponse> call, @NonNull Response<AuthResponse> response) {
+                        if (response.isSuccessful() && response.body() != null && response.body().getUser() != null) {
+                            tokenManager.saveUser(response.body().getUser());
+                            liveData.setValue(response.body());
+                        } else {
+                            liveData.setValue(null);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<AuthResponse> call, @NonNull Throwable t) {
+                        liveData.setValue(null);
+                    }
+                });
+
+        return liveData;
+    }
+
+    public LiveData<AuthResponse> changePassword(String newPassword) {
+        MutableLiveData<AuthResponse> liveData = new MutableLiveData<>();
+        String token = tokenManager.getToken();
+        if (token == null) {
+            liveData.setValue(null);
+            return liveData;
+        }
+
+        String authHeader = "Bearer " + token;
+
+        apiService.changePassword(authHeader, new ChangePasswordRequest(newPassword))
+                .enqueue(new Callback<AuthResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<AuthResponse> call, @NonNull Response<AuthResponse> response) {
+                        if (response.isSuccessful() && response.body() != null && response.body().getUser() != null) {
+                            tokenManager.saveUser(response.body().getUser());
+                            liveData.setValue(response.body());
+                        } else {
+                            liveData.setValue(null);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<AuthResponse> call, @NonNull Throwable t) {
+                        liveData.setValue(null);
+                    }
+                });
 
         return liveData;
     }

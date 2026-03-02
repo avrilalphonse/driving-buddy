@@ -51,6 +51,14 @@ public class AuthViewModel extends AndroidViewModel{
         return authRepository.getProfilePictureUrl();
     }
 
+    public LiveData<AuthResponse> updateProfile(String name, String email) {
+        return authRepository.updateProfile(name, email);
+    }
+
+    public LiveData<AuthResponse> changePassword(String newPassword) {
+        return authRepository.changePassword(newPassword);
+    }
+
     public void logout() {
         authRepository.logout();
     }
