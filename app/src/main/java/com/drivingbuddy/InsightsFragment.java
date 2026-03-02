@@ -356,15 +356,7 @@ public class InsightsFragment extends Fragment {
             int hardBraking = drive.getIncidents().getSuddenBraking();
             int laneDeviation = drive.getIncidents().getLaneDeviation();
             int inconsistentSpeed = drive.getIncidents().getInconsistentSpeed();
-
-            // get sharp turning count from incident_details if available
-            int sharpTurning = 0;
-            if (drive.getIncidentDetails() != null && drive.getIncidentDetails().containsKey("sharp_turning")) {
-                List<java.util.Map<String, Object>> sharpTurns = drive.getIncidentDetails().get("sharp_turning");
-                if (sharpTurns != null) {
-                    sharpTurning = sharpTurns.size();
-                }
-            }
+            int sharpTurning = drive.getIncidents().getSharpTurning();
 
             hardBrakingCount.setText(hardBraking + " Hard Brake" + (hardBraking != 1 ? "s" : ""));
             sharpTurningCount.setText(sharpTurning + " Sharp Turn" + (sharpTurning != 1 ? "s" : ""));
@@ -415,7 +407,8 @@ public class InsightsFragment extends Fragment {
                     android.graphics.Color.parseColor("#FFEB3B"));
 
             // Lane deviation - BLUE #2196F3
-            java.util.List<java.util.Map<String, Object>> laneDeviations = drive.getIncidentDetails().get("lane_deviation");
+            addIncidentMarkers(googleMap, drive.getIncidentDetails().get("lane_deviation"),
+                    android.graphics.Color.parseColor("#2196F3"));
 
             // Inconsistent speed - ORANGE #FF9800
             addIncidentMarkers(googleMap, drive.getIncidentDetails().get("inconsistent_speed"),
@@ -492,13 +485,7 @@ public class InsightsFragment extends Fragment {
     private void setupCharts(View view) {
         generateChart(view, R.id.lineChart1, drive -> drive.reducedLaneDeviation, "Bad Lane Changing");
         generateChart(view, R.id.lineChart2, drive -> drive.sharpBraking, "Sudden Braking");
-
-        LineChart sharpTurnsChart = view.findViewById(R.id.lineChart3);
-        sharpTurnsChart.setNoDataText("No data available"); // for now!
-        sharpTurnsChart.setNoDataTextColor(Color.GRAY);
-        sharpTurnsChart.setNoDataTextTypeface(Typeface.DEFAULT);
-        sharpTurnsChart.invalidate();
-
+        generateChart(view, R.id.lineChart3, drive -> drive.sharpTurns, "Sharp Turns");
         generateChart(view, R.id.lineChart4, drive -> drive.inconsistentSpeeds, "Inconsistent Speeds");
     }
 
