@@ -8,7 +8,6 @@ import java.util.Map;
 
 public final class GoalProgressCalculator {
     private static final int MIN_TOTAL_MINUTES = 30;
-    private static final double BASELINE_MINUTES = 60.0;
     private static final double ROLLING_MINUTES = 30.0;
 
     private GoalProgressCalculator() {
@@ -60,9 +59,16 @@ public final class GoalProgressCalculator {
             return new Result(progress, false);
         }
 
-        WindowTotals baseline = accumulateForward(orderedDrives, BASELINE_MINUTES);
         WindowTotals rolling = accumulateBackward(orderedDrives, ROLLING_MINUTES);
-        if (baseline.totalMinutes < MIN_TOTAL_MINUTES || rolling.totalMinutes < MIN_TOTAL_MINUTES) {
+        if (rolling.totalMinutes < MIN_TOTAL_MINUTES) {
+            return new Result(progress, false);
+        }
+        double baselineMinutesLimit = totalMinutes - rolling.totalMinutes;
+        if (baselineMinutesLimit <= 0.0) {
+            return new Result(progress, false);
+        }
+        WindowTotals baseline = accumulateForward(orderedDrives, baselineMinutesLimit);
+        if (baseline.totalMinutes < MIN_TOTAL_MINUTES) {
             return new Result(progress, false);
         }
 
