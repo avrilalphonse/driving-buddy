@@ -398,11 +398,8 @@ public class HomeFragment extends Fragment {
         // API call returns newest first, but we want oldest first for charts
         Collections.reverse(allDrives);
 
-        // show 5 most recent drives
-        int startIndex = Math.max(0, allDrives.size() - 5);
-        for (int i = startIndex; i < allDrives.size(); i++) {
-            drives.add(allDrives.get(i));
-        }
+        // show all drives for long-term insights
+        drives.addAll(allDrives);
 
         updateChart();
 
