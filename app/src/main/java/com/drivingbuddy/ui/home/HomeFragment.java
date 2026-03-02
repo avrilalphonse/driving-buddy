@@ -41,6 +41,7 @@ import com.drivingbuddy.ui.goals.GoalViewModel;
 import com.drivingbuddy.utils.CarModelMapper;
 import com.drivingbuddy.utils.GoalProgressCalculator;
 import com.drivingbuddy.utils.TokenManager;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -441,12 +442,20 @@ public class HomeFragment extends Fragment {
         chart.getDescription().setEnabled(false);
         chart.getLegend().setEnabled(true);
         chart.getLegend().setTextColor(Color.GRAY);
+        chart.getLegend().setDrawInside(false);
+        chart.getLegend().setWordWrapEnabled(true);
         chart.getAxisRight().setEnabled(false);
         chart.setTouchEnabled(false);
         chart.setClickable(true);
         chart.setFocusable(true);
 
-        chart.setViewPortOffsets(40f, 20f, 40f, 50f);
+        chart.setViewPortOffsets(40f, 20f, 40f, 95f);
+
+        chart.getLegend().setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+        chart.getLegend().setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+        chart.getLegend().setOrientation(Legend.LegendOrientation.HORIZONTAL);
+
+        chart.getLegend().setMaxSizePercent(0.85f); // wrapping so the dates and legend don't overlap!
 
         // show date range instead of individual dates
         XAxis xAxis = chart.getXAxis();
