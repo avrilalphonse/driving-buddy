@@ -40,6 +40,7 @@ import com.drivingbuddy.R;
 import com.drivingbuddy.ui.goals.GoalViewModel;
 import com.drivingbuddy.utils.CarModelMapper;
 import com.drivingbuddy.utils.GoalProgressCalculator;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -387,11 +388,10 @@ public class HomeFragment extends Fragment {
         for (DriveDataResponse drive : data.getDrives()) {
             String displayDate = formatDateForDisplay(drive.getDate());
 
-            // ignoring sharp turns for now
             DriveData driveData = new DriveData(
                     displayDate,
                     drive.getIncidents().getSuddenBraking(),
-                    0,
+                    drive.getIncidents().getSharpTurning(),
                     drive.getIncidents().getInconsistentSpeed(),
                     drive.getIncidents().getLaneDeviation()
             );
@@ -440,12 +440,20 @@ public class HomeFragment extends Fragment {
         chart.getDescription().setEnabled(false);
         chart.getLegend().setEnabled(true);
         chart.getLegend().setTextColor(Color.GRAY);
+        chart.getLegend().setDrawInside(false);
+        chart.getLegend().setWordWrapEnabled(true);
         chart.getAxisRight().setEnabled(false);
         chart.setTouchEnabled(false);
         chart.setClickable(true);
         chart.setFocusable(true);
 
-        chart.setViewPortOffsets(40f, 20f, 40f, 50f);
+        chart.setViewPortOffsets(40f, 20f, 40f, 95f);
+
+        chart.getLegend().setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+        chart.getLegend().setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+        chart.getLegend().setOrientation(Legend.LegendOrientation.HORIZONTAL);
+
+        chart.getLegend().setMaxSizePercent(0.85f); // wrapping so the dates and legend don't overlap!
 
         // show date range instead of individual dates
         XAxis xAxis = chart.getXAxis();
@@ -485,11 +493,13 @@ public class HomeFragment extends Fragment {
         List<Entry> suddenBrakingEntries = new ArrayList<>();
         List<Entry> inconsistentSpeedEntries = new ArrayList<>();
         List<Entry> laneDeviationEntries = new ArrayList<>();
+        List<Entry> sharpTurningEntries = new ArrayList<>();
 
         for (int i = 0; i < drives.size(); i++) {
             suddenBrakingEntries.add(new Entry(i, drives.get(i).sharpBraking));
             inconsistentSpeedEntries.add(new Entry(i, drives.get(i).inconsistentSpeeds));
             laneDeviationEntries.add(new Entry(i, drives.get(i).reducedLaneDeviation));
+            sharpTurningEntries.add(new Entry(i, drives.get(i).sharpTurns));
         }
 
         boolean singlePoint = drives.size() <= 1;
@@ -536,10 +546,26 @@ public class HomeFragment extends Fragment {
         laneDeviationSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
         laneDeviationSet.setCubicIntensity(0.2f);
 
+        // Sharp Turning
+        LineDataSet sharpTurningSet = new LineDataSet(sharpTurningEntries, "Sharp Turning");
+        sharpTurningSet.setColor(Color.parseColor("#F9A825"));
+        sharpTurningSet.setLineWidth(2.5f);
+        sharpTurningSet.setDrawCircles(singlePoint);
+        if (singlePoint) {
+            sharpTurningSet.setCircleRadius(3.5f);
+            sharpTurningSet.setCircleColor(Color.parseColor("#F9A825"));
+            sharpTurningSet.setDrawCircleHole(false);
+        }
+        sharpTurningSet.setDrawValues(false);
+        sharpTurningSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        sharpTurningSet.setCubicIntensity(0.2f);
+
+
         LineData lineData = new LineData();
         lineData.addDataSet(suddenBrakingSet);
         lineData.addDataSet(inconsistentSpeedSet);
         lineData.addDataSet(laneDeviationSet);
+        lineData.addDataSet(sharpTurningSet);
 
         return lineData;
     }

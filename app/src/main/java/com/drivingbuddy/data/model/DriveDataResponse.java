@@ -82,6 +82,9 @@ public class DriveDataResponse {
         @SerializedName("inconsistent_speed")
         private int inconsistentSpeed;
 
+        @SerializedName("sharp_turning")
+        private int sharpTurning;
+
         @SerializedName("lane_deviation")
         private int laneDeviation;
 
@@ -91,6 +94,9 @@ public class DriveDataResponse {
 
         public int getInconsistentSpeed() { return inconsistentSpeed; }
         public void setInconsistentSpeed(int inconsistentSpeed) { this.inconsistentSpeed = inconsistentSpeed; }
+
+        public int getSharpTurning() { return sharpTurning; }
+        public void setSharpTurning(int sharpTurning) { this.sharpTurning = sharpTurning; }
 
         public int getLaneDeviation() { return laneDeviation; }
         public void setLaneDeviation(int laneDeviation) { this.laneDeviation = laneDeviation; }
