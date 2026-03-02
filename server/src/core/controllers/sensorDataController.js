@@ -186,9 +186,18 @@ export { importCsvToMongoDB };
 export const getPersistentSummaryData = async (req, res) => {
     try {
         console.log('Fetching data from persistent_summary_data collection...');
+        const { userID } = req.query;
+        if (!userID) {
+            return res.status(400).json({ error: 'userID query parameter is required' });
+        }
 
         // Get all trips, sorted by start time (newest first)
-        const trips = await PersistentSummaryData.find()
+        const trips = await PersistentSummaryData.find({
+            $or: [
+                { userID },
+                { userID: { $exists: false } }
+            ]
+        })
             .sort({ start_of_trip_timestamp: -1 })
             .lean();
 

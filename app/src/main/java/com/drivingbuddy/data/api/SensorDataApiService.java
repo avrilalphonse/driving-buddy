@@ -12,7 +12,7 @@ public interface SensorDataApiService {
     Call<BucketedDataResponse> getBucketedData(@Query("windowSeconds") int windowSeconds);
 
     @GET("api/sensor-data/get-persistent-summary")
-    Call<BucketedDataResponse> getPersistentSummaryData();
+    Call<BucketedDataResponse> getPersistentSummaryData(@Query("userID") String userID);
 
     @GET("api/sensor-data/get-ai-insights")
     Call<AIInsightsResponse> getAIInsights(@Query("userID") String userID);

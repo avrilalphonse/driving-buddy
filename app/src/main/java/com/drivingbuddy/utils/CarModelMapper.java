@@ -11,7 +11,7 @@ public class CarModelMapper {
         if ("Corolla Cross".equals(model)) {
             return "models/greytoyotacorollacross.glb";
         }
-        if ("Mini Cooper".equals(model)) {
+        if ("Mini Cooper".equals(model) || "Cooper".equals(model)) {
             return "models/blackminicooper.glb";
         }
         if ("SUV".equals(model)) {

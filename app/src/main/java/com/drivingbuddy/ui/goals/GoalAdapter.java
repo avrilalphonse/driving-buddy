@@ -99,7 +99,11 @@ public class GoalAdapter extends RecyclerView.Adapter<GoalAdapter.GoalViewHolder
                             .scaleY(1f)
                             .setDuration(200)
                             .start();
-                    progressPercent.setText("Progress: " + progress + "%");
+                    if (goal.hasEnoughData()) {
+                        progressPercent.setText("Progress: " + progress + "%");
+                    } else {
+                        progressPercent.setText("Not enough data to show progress yet.");
+                    }
                 } else {
                     expandableSection.animate()
                             .alpha(0f)

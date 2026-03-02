@@ -20,6 +20,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.content.Context;
 import android.webkit.WebResourceResponse;
 import androidx.webkit.WebViewAssetLoader;
 
@@ -38,6 +39,7 @@ import com.drivingbuddy.DriveData;
 import com.drivingbuddy.R;
 import com.drivingbuddy.ui.goals.GoalViewModel;
 import com.drivingbuddy.utils.CarModelMapper;
+import com.drivingbuddy.utils.GoalProgressCalculator;
 import com.drivingbuddy.utils.TokenManager;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -59,6 +61,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -92,6 +95,7 @@ public class HomeFragment extends Fragment {
     private AuthViewModel authViewModel;
     private List<Goal> currentGoals = new ArrayList<>();
     private View rootView;
+    private String currentUserId;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -132,7 +136,8 @@ public class HomeFragment extends Fragment {
         rootView = view;
 
         String userName = authViewModel.getUserName();
-        String userEmail = authViewModel.getUserEmail();
+        String userID = authViewModel.getUserId();
+        currentUserId = userID;
 
         // welcome banner
         TextView welcomeHeader = view.findViewById(R.id.welcome_header);
@@ -155,8 +160,8 @@ public class HomeFragment extends Fragment {
 
         // api service setup
         apiService = ApiClient.getClient().create(SensorDataApiService.class);
-        if ("test@gmail.com".equals(userEmail)) {
-            BucketedDataResponse cachedData = DrivingDataCache.getCachedData();
+        if (userID != null && !userID.isEmpty()) {
+            BucketedDataResponse cachedData = DrivingDataCache.getCachedData(userID);
             if (cachedData != null) {
                 // use cached data if available
                 processDriveData(cachedData);
@@ -166,10 +171,9 @@ public class HomeFragment extends Fragment {
                     progressBar.setVisibility(View.VISIBLE);
                 }
                 // fetch data from API
-                fetchDriveData();
+                fetchDriveData(userID);
             }
         } else {
-            // for demo users, show empty state!
             showEmptyChart();
         }
 
@@ -220,10 +224,8 @@ public class HomeFragment extends Fragment {
             } else {
                 noGoalsMessage.setVisibility(View.GONE);
                 currentGoals = goals;
-                if ("test@gmail.com".equals(userEmail)) {
-                    // Update progress if we have cached data
-                    updateGoalProgress(goals);
-                }
+                // Update progress if we have cached data
+                updateGoalProgress(goals);
                 homeGoalAdapter.setGoals(goals);
             }
         });
@@ -264,6 +266,7 @@ public class HomeFragment extends Fragment {
         settings.setAllowContentAccess(true);
         settings.setAllowFileAccessFromFileURLs(true);
         settings.setAllowUniversalAccessFromFileURLs(true);
+        Context appContext = requireContext().getApplicationContext();
         WebViewAssetLoader.PathHandler assetsHandler = path -> {
             try {
                 String assetPath = path;
@@ -273,7 +276,7 @@ public class HomeFragment extends Fragment {
                 if (assetPath.startsWith("assets/")) {
                     assetPath = assetPath.substring("assets/".length());
                 }
-                InputStream inputStream = requireContext().getAssets().open(assetPath);
+                InputStream inputStream = appContext.getAssets().open(assetPath);
                 String mimeType;
                 if (assetPath.endsWith(".js")) {
                     mimeType = "application/javascript";
@@ -330,57 +333,26 @@ public class HomeFragment extends Fragment {
 
     private void updateGoalProgress(List<Goal> goals) {
         // Get cached data to calculate progress
-        BucketedDataResponse cachedData = DrivingDataCache.getCachedData();
+        if (currentUserId == null || currentUserId.isEmpty()) {
+            return;
+        }
+        BucketedDataResponse cachedData = DrivingDataCache.getCachedData(currentUserId);
         if (cachedData == null || goals == null) {
             return;
         }
-
-        // Calculate progress from cached data
-        int totalDrives = 0;
-        int goodBrakingDrives = 0;
-        int goodSpeedDrives = 0;
-        int goodLaneDeviationDrives = 0;
-
-        for (DriveDataResponse drive : cachedData.getDrives()) {
-            totalDrives++;
-
-            if (drive.getIncidents().getSuddenBraking() == 0) {
-                goodBrakingDrives++;
-            }
-            if (drive.getIncidents().getInconsistentSpeed() == 0) {
-                goodSpeedDrives++;
-            }
-            if (drive.getIncidents().getLaneDeviation() == 0) {
-                goodLaneDeviationDrives++;
-            }
-        }
-
-        // Calculate progress percentages
-        int brakingProgress = Math.min(100, goodBrakingDrives * 2);
-        int speedProgress = Math.min(100, goodSpeedDrives * 2);
-        int laneProgress = Math.min(100, goodLaneDeviationDrives * 2);
-
-        // Update each goal with its progress
+        GoalProgressCalculator.Result result = GoalProgressCalculator.calculate(cachedData.getDrives());
+        Map<String, Integer> progress = result.getProgress();
         for (Goal goal : goals) {
-            switch (goal.getTitle()) {
-                case "Reduce sudden braking":
-                    goal.setProgress(brakingProgress);
-                    break;
-                case "Reduce inconsistent speeds":
-                    goal.setProgress(speedProgress);
-                    break;
-                case "Reduce lane deviation":
-                    goal.setProgress(laneProgress);
-                    break;
-                case "Reduce sharp turns":
-                    goal.setProgress(0); // No data available
-                    break;
+            Integer value = progress.get(goal.getTitle());
+            if (value != null) {
+                goal.setProgress(value);
             }
+            goal.setHasEnoughData(result.hasEnoughData());
         }
     }
 
-    private void fetchDriveData() {
-        Call<BucketedDataResponse> call = apiService.getBucketedData(10);
+    private void fetchDriveData(String userID) {
+        Call<BucketedDataResponse> call = apiService.getPersistentSummaryData(userID);
 
         call.enqueue(new Callback<BucketedDataResponse>() {
             @Override
@@ -391,7 +363,7 @@ public class HomeFragment extends Fragment {
 
                 if (response.isSuccessful() && response.body() != null) {
                     BucketedDataResponse data = response.body();
-                    DrivingDataCache.setCachedData(data);
+                    DrivingDataCache.setCachedData(data, userID);
                     processDriveData(data);
                 } else {
                     showEmptyChart();
@@ -431,11 +403,8 @@ public class HomeFragment extends Fragment {
         // API call returns newest first, but we want oldest first for charts
         Collections.reverse(allDrives);
 
-        // show 5 most recent drives
-        int startIndex = Math.max(0, allDrives.size() - 5);
-        for (int i = startIndex; i < allDrives.size(); i++) {
-            drives.add(allDrives.get(i));
-        }
+        // show all drives for long-term insights
+        drives.addAll(allDrives);
 
         updateChart();
 
@@ -525,11 +494,18 @@ public class HomeFragment extends Fragment {
             laneDeviationEntries.add(new Entry(i, drives.get(i).reducedLaneDeviation));
         }
 
+        boolean singlePoint = drives.size() <= 1;
+
         // Sudden Braking
         LineDataSet suddenBrakingSet = new LineDataSet(suddenBrakingEntries, "Sudden Braking");
         suddenBrakingSet.setColor(Color.parseColor("#E76F51"));
         suddenBrakingSet.setLineWidth(2.5f);
-        suddenBrakingSet.setDrawCircles(false);
+        suddenBrakingSet.setDrawCircles(singlePoint);
+        if (singlePoint) {
+            suddenBrakingSet.setCircleRadius(3.5f);
+            suddenBrakingSet.setCircleColor(Color.parseColor("#E76F51"));
+            suddenBrakingSet.setDrawCircleHole(false);
+        }
         suddenBrakingSet.setDrawValues(false);
         suddenBrakingSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
         suddenBrakingSet.setCubicIntensity(0.2f);
@@ -538,7 +514,12 @@ public class HomeFragment extends Fragment {
         LineDataSet inconsistentSpeedSet = new LineDataSet(inconsistentSpeedEntries, "Inconsistent Speed");
         inconsistentSpeedSet.setColor(Color.parseColor("#2A9D8F"));
         inconsistentSpeedSet.setLineWidth(2.5f);
-        inconsistentSpeedSet.setDrawCircles(false);
+        inconsistentSpeedSet.setDrawCircles(singlePoint);
+        if (singlePoint) {
+            inconsistentSpeedSet.setCircleRadius(3.5f);
+            inconsistentSpeedSet.setCircleColor(Color.parseColor("#2A9D8F"));
+            inconsistentSpeedSet.setDrawCircleHole(false);
+        }
         inconsistentSpeedSet.setDrawValues(false);
         inconsistentSpeedSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
         inconsistentSpeedSet.setCubicIntensity(0.2f);
@@ -547,7 +528,12 @@ public class HomeFragment extends Fragment {
         LineDataSet laneDeviationSet = new LineDataSet(laneDeviationEntries, "Lane Deviation");
         laneDeviationSet.setColor(Color.parseColor("#264653"));
         laneDeviationSet.setLineWidth(2.5f);
-        laneDeviationSet.setDrawCircles(false);
+        laneDeviationSet.setDrawCircles(singlePoint);
+        if (singlePoint) {
+            laneDeviationSet.setCircleRadius(3.5f);
+            laneDeviationSet.setCircleColor(Color.parseColor("#264653"));
+            laneDeviationSet.setDrawCircleHole(false);
+        }
         laneDeviationSet.setDrawValues(false);
         laneDeviationSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
         laneDeviationSet.setCubicIntensity(0.2f);

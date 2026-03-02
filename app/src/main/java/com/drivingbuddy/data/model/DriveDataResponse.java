@@ -31,6 +31,18 @@ public class DriveDataResponse {
     @SerializedName("duration_minutes")
     private Integer durationMinutes;
 
+    @SerializedName("start_timestamp")
+    private java.util.Date startTimestamp;
+
+    @SerializedName("end_timestamp")
+    private java.util.Date endTimestamp;
+
+    @SerializedName("start_of_trip_timestamp")
+    private java.util.Date startOfTripTimestamp;
+
+    @SerializedName("end_of_trip_timestamp")
+    private java.util.Date endOfTripTimestamp;
+
     @SerializedName("raw_data")
     private Object rawData;
 
@@ -47,6 +59,11 @@ public class DriveDataResponse {
     public void setDurationMinutes(Integer durationMinutes) {
         this.durationMinutes = durationMinutes;
     }
+
+    public java.util.Date getStartTimestamp() { return startTimestamp; }
+    public java.util.Date getEndTimestamp() { return endTimestamp; }
+    public java.util.Date getStartOfTripTimestamp() { return startOfTripTimestamp; }
+    public java.util.Date getEndOfTripTimestamp() { return endOfTripTimestamp; }
 
     public String getDisplayDate() { return displayDate; }
     public void setDisplayDate(String displayDate) { this.displayDate = displayDate; }
