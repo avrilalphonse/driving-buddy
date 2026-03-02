@@ -514,7 +514,13 @@ public class InsightsFragment extends Fragment {
 
         dataSet.setColor(Color.parseColor("#115655"));
         dataSet.setLineWidth(2.5f);
-        dataSet.setDrawCircles(false); // Remove circles
+        boolean singlePoint = entries.size() <= 1;
+        dataSet.setDrawCircles(singlePoint);
+        if (singlePoint) {
+            dataSet.setCircleRadius(3.5f);
+            dataSet.setCircleColor(Color.parseColor("#115655"));
+            dataSet.setDrawCircleHole(false);
+        }
         dataSet.setDrawValues(false); // Remove value labels
         dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
         dataSet.setCubicIntensity(0.2f);

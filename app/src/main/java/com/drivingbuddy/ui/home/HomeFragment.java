@@ -492,11 +492,18 @@ public class HomeFragment extends Fragment {
             laneDeviationEntries.add(new Entry(i, drives.get(i).reducedLaneDeviation));
         }
 
+        boolean singlePoint = drives.size() <= 1;
+
         // Sudden Braking
         LineDataSet suddenBrakingSet = new LineDataSet(suddenBrakingEntries, "Sudden Braking");
         suddenBrakingSet.setColor(Color.parseColor("#E76F51"));
         suddenBrakingSet.setLineWidth(2.5f);
-        suddenBrakingSet.setDrawCircles(false);
+        suddenBrakingSet.setDrawCircles(singlePoint);
+        if (singlePoint) {
+            suddenBrakingSet.setCircleRadius(3.5f);
+            suddenBrakingSet.setCircleColor(Color.parseColor("#E76F51"));
+            suddenBrakingSet.setDrawCircleHole(false);
+        }
         suddenBrakingSet.setDrawValues(false);
         suddenBrakingSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
         suddenBrakingSet.setCubicIntensity(0.2f);
@@ -505,7 +512,12 @@ public class HomeFragment extends Fragment {
         LineDataSet inconsistentSpeedSet = new LineDataSet(inconsistentSpeedEntries, "Inconsistent Speed");
         inconsistentSpeedSet.setColor(Color.parseColor("#2A9D8F"));
         inconsistentSpeedSet.setLineWidth(2.5f);
-        inconsistentSpeedSet.setDrawCircles(false);
+        inconsistentSpeedSet.setDrawCircles(singlePoint);
+        if (singlePoint) {
+            inconsistentSpeedSet.setCircleRadius(3.5f);
+            inconsistentSpeedSet.setCircleColor(Color.parseColor("#2A9D8F"));
+            inconsistentSpeedSet.setDrawCircleHole(false);
+        }
         inconsistentSpeedSet.setDrawValues(false);
         inconsistentSpeedSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
         inconsistentSpeedSet.setCubicIntensity(0.2f);
@@ -514,7 +526,12 @@ public class HomeFragment extends Fragment {
         LineDataSet laneDeviationSet = new LineDataSet(laneDeviationEntries, "Lane Deviation");
         laneDeviationSet.setColor(Color.parseColor("#264653"));
         laneDeviationSet.setLineWidth(2.5f);
-        laneDeviationSet.setDrawCircles(false);
+        laneDeviationSet.setDrawCircles(singlePoint);
+        if (singlePoint) {
+            laneDeviationSet.setCircleRadius(3.5f);
+            laneDeviationSet.setCircleColor(Color.parseColor("#264653"));
+            laneDeviationSet.setDrawCircleHole(false);
+        }
         laneDeviationSet.setDrawValues(false);
         laneDeviationSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
         laneDeviationSet.setCubicIntensity(0.2f);
