@@ -33,7 +33,7 @@
             android:gravity="center_vertical"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"
-            android:padding="16dp"
+            android:paddingRight="16dp"
             android:clickable="false"
             android:focusable="false"
             android:background="?attr/selectableItemBackground">
@@ -83,7 +83,8 @@
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:src="@drawable/ic_edit"
-                android:contentDescription="View Profile"/>
+                android:contentDescription="View Profile"
+                android:layout_gravity="center"/>
         </LinearLayout>
 
         <!-- Settings Title -->
