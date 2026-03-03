@@ -77,14 +77,17 @@ public final class GoalProgressCalculator {
 
         double brakingBaselineRate = baseline.brakingCount / baselineHours;
         double speedBaselineRate = baseline.speedCount / baselineHours;
+        double sharpBaselineRate = baseline.sharpCount / baselineHours;
         double laneBaselineRate = baseline.laneCount / baselineHours;
 
         double brakingRollingRate = rolling.brakingCount / rollingHours;
         double speedRollingRate = rolling.speedCount / rollingHours;
+        double sharpRollingRate = rolling.sharpCount / rollingHours;
         double laneRollingRate = rolling.laneCount / rollingHours;
 
         progress.put("Reduce sudden braking", progressFromRates(brakingBaselineRate, brakingRollingRate));
         progress.put("Reduce inconsistent speeds", progressFromRates(speedBaselineRate, speedRollingRate));
+        progress.put("Reduce sharp turns", progressFromRates(sharpBaselineRate, sharpRollingRate));
         progress.put("Reduce lane deviation", progressFromRates(laneBaselineRate, laneRollingRate));
 
         return new Result(progress, true);
@@ -119,14 +122,15 @@ public final class GoalProgressCalculator {
             DriveDataResponse.IncidentData incidents = drive.getIncidents();
             int braking = incidents == null ? 0 : incidents.getSuddenBraking();
             int speed = incidents == null ? 0 : incidents.getInconsistentSpeed();
+            int sharp = incidents == null ? 0 : incidents.getSharpTurning();
             int lane = incidents == null ? 0 : incidents.getLaneDeviation();
 
             if (minutes <= remaining) {
-                totals.add(minutes, braking, speed, lane);
+                totals.add(minutes, braking, speed, sharp, lane);
                 remaining -= minutes;
             } else {
                 double ratio = remaining / minutes;
-                totals.add(remaining, braking * ratio, speed * ratio, lane * ratio);
+                totals.add(remaining, braking * ratio, speed * ratio, sharp * ratio, lane * ratio);
                 remaining = 0.0;
             }
         }
@@ -149,14 +153,15 @@ public final class GoalProgressCalculator {
             DriveDataResponse.IncidentData incidents = drive.getIncidents();
             int braking = incidents == null ? 0 : incidents.getSuddenBraking();
             int speed = incidents == null ? 0 : incidents.getInconsistentSpeed();
+            int sharp = incidents == null ? 0 : incidents.getSharpTurning();
             int lane = incidents == null ? 0 : incidents.getLaneDeviation();
 
             if (minutes <= remaining) {
-                totals.add(minutes, braking, speed, lane);
+                totals.add(minutes, braking, speed, sharp, lane);
                 remaining -= minutes;
             } else {
                 double ratio = remaining / minutes;
-                totals.add(remaining, braking * ratio, speed * ratio, lane * ratio);
+                totals.add(remaining, braking * ratio, speed * ratio, sharp * ratio, lane * ratio);
                 remaining = 0.0;
             }
         }
@@ -167,12 +172,14 @@ public final class GoalProgressCalculator {
         double totalMinutes;
         double brakingCount;
         double speedCount;
+        double sharpCount;
         double laneCount;
 
-        void add(double minutes, double braking, double speed, double lane) {
+        void add(double minutes, double braking, double speed, double sharp, double lane) {
             totalMinutes += minutes;
             brakingCount += braking;
             speedCount += speed;
+            sharpCount += sharp;
             laneCount += lane;
         }
     }
