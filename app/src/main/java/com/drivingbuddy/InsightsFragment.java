@@ -431,20 +431,46 @@ public class InsightsFragment extends Fragment {
         if (incidents == null) return;
 
         for (java.util.Map<String, Object> incident : incidents) {
-            Double lat = (Double) incident.get("latitude");
-            Double lon = (Double) incident.get("longitude");
-            if (lat != null && lon != null) {
+            try {
+                // Handle both Double and String types
+                double lat = parseDouble(incident.get("latitude"));
+                double lon = parseDouble(incident.get("longitude"));
+
                 com.google.android.gms.maps.model.LatLng location =
                         new com.google.android.gms.maps.model.LatLng(lat, lon);
-
-                // small custom marker
                 googleMap.addMarker(new com.google.android.gms.maps.model.MarkerOptions()
                         .position(location)
                         .icon(createSmallMarkerIcon(color))
                         .anchor(0.5f, 0.5f)
                         .flat(true));
+            } catch (Exception e) {
+                Log.e("InsightsFragment", "Failed to parse incident location: " + e.getMessage());
             }
+
+//            if (lat != null && lon != null) {
+//                com.google.android.gms.maps.model.LatLng location =
+//                        new com.google.android.gms.maps.model.LatLng(lat, lon);
+//
+//                // small custom marker
+//                googleMap.addMarker(new com.google.android.gms.maps.model.MarkerOptions()
+//                        .position(location)
+//                        .icon(createSmallMarkerIcon(color))
+//                        .anchor(0.5f, 0.5f)
+//                        .flat(true));
+//            }
         }
+    }
+
+    // helper method to safely parse numbers
+    private double parseDouble(Object value) {
+        if (value instanceof Double) {
+            return (Double) value;
+        } else if (value instanceof Number) {
+            return ((Number) value).doubleValue();
+        } else if (value instanceof String) {
+            return Double.parseDouble((String) value);
+        }
+        return 0.0;
     }
 
     private com.google.android.gms.maps.model.BitmapDescriptor createSmallMarkerIcon(int color) {
