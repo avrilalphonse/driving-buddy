@@ -200,33 +200,34 @@
             </androidx.cardview.widget.CardView>
 
             <!-- Past Drives Header -->
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingTop="24dp"
-                android:paddingBottom="12dp">
+                android:paddingTop="12dp">
 
                 <ImageView
+                    android:id="@+id/past_drive_logo"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:src="@drawable/ic_history"
                     app:tint="@color/onSurface"
-                    android:contentDescription="Past Drives" />
+                    android:contentDescription="Past Drives"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/past_drive_header"/>
 
                 <TextView
+                    android:id="@+id/past_drive_header"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:text="Check out your past drives!"
                     android:textColor="@color/onSurface"
                     android:textSize="16sp"
-                    android:layout_marginStart="12dp"/>
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_weight="1" />
+                    android:layout_marginStart="12dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/past_drive_logo"/>
 
                 <TextView
                     android:id="@+id/show_all_drives_toggle"
@@ -235,8 +236,12 @@
                     android:text="Show all"
                     android:textColor="?attr/colorPrimary"
                     android:textSize="14sp"
-                    android:padding="6dp" />
-            </LinearLayout>
+                    android:paddingTop="10dp"
+                    android:paddingRight="6dp"
+                    app:layout_constraintTop_toBottomOf="@id/past_drive_header"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <!-- Past Drives List -->
             <LinearLayout

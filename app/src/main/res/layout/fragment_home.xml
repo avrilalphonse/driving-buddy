@@ -93,7 +93,7 @@
 
             <com.github.mikephil.charting.charts.LineChart
                 android:id="@+id/long_term_insight_chart"
-                android:layout_width="370dp"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center_horizontal"
                 android:clickable="false"

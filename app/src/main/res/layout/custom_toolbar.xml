@@ -9,17 +9,21 @@
     app:title=""
     app:contentInsetStart="0dp">
 
-    <FrameLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <ImageView
             android:id="@+id/logo"
-            android:layout_width="150dp"
+            android:layout_width="120dp"
             android:layout_height="95dp"
             android:layout_gravity="center"
             android:contentDescription="@string/app_name"
-            android:src="@drawable/ic_logo" />
+            android:src="@drawable/ic_logo"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
         <TextView
             android:id="@+id/toolbar_title_left"
@@ -31,7 +35,9 @@
             android:textColor="@android:color/white"
             android:fontFamily="@font/montserrat_semibold"
             android:textStyle="bold"
-            android:layout_marginStart="50dp" />
+            app:layout_constraintEnd_toStartOf="@id/logo"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
         <TextView
             android:id="@+id/toolbar_title_right"
@@ -43,8 +49,10 @@
             android:textColor="@android:color/white"
             android:fontFamily="@font/montserrat_semibold"
             android:textStyle="bold"
-            android:layout_marginStart="101dp" />
-
-    </FrameLayout>
+            android:layout_marginStart="3dp"
+            app:layout_constraintStart_toEndOf="@id/logo"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.appcompat.widget.Toolbar>
