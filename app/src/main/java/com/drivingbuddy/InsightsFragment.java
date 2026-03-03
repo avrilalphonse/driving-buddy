@@ -185,11 +185,10 @@ public class InsightsFragment extends Fragment {
         for (DriveDataResponse drive : data.getDrives()) {
             String displayDate = formatDateForDisplay(drive.getDate());
 
-            // ignoring sharp turns for now
             DriveData driveData = new DriveData(
                     displayDate,
                     drive.getIncidents().getSuddenBraking(),
-                    0,
+                    drive.getIncidents().getSharpTurning(),
                     drive.getIncidents().getInconsistentSpeed(),
                     drive.getIncidents().getLaneDeviation()
             );
@@ -379,22 +378,36 @@ public class InsightsFragment extends Fragment {
     }
 
     private void setupDriveMap(com.google.android.gms.maps.GoogleMap googleMap, DriveDataResponse drive) {
-        if (drive.getStartLocation() == null || drive.getEndLocation() == null) {
-            return;  // no GPS data available
+        if (drive.getStartLocation() == null || drive.getEndLocation() == null ||
+                drive.getStartLocation().length < 2 || drive.getEndLocation().length < 2) {
+            showNoGpsPlaceholder(googleMap);
+            return;
         }
 
-        googleMap.getUiSettings().setAllGesturesEnabled(false);
-        googleMap.getUiSettings().setZoomControlsEnabled(false);
-
-        // start and end locations (API returns [lon, lat])
+        // extract coordinates (stored as [lat, lon])
         com.google.android.gms.maps.model.LatLng start = new com.google.android.gms.maps.model.LatLng(
-                drive.getStartLocation()[1],  // latitude
-                drive.getStartLocation()[0]   // longitude
+                drive.getStartLocation()[0],  // latitude
+                drive.getStartLocation()[1]   // longitude
         );
         com.google.android.gms.maps.model.LatLng end = new com.google.android.gms.maps.model.LatLng(
-                drive.getEndLocation()[1],
-                drive.getEndLocation()[0]
+                drive.getEndLocation()[0],
+                drive.getEndLocation()[1]
         );
+
+        // Calculate distance between start and end (in degrees, roughly)
+        double latDiff = Math.abs(start.latitude - end.latitude);
+        double lonDiff = Math.abs(start.longitude - end.longitude);
+        double distance = Math.sqrt(latDiff * latDiff + lonDiff * lonDiff);
+
+        // if distance is very small (~< 100 meters), show single point map
+        if (distance < 0.001) {  // ~100 meters
+            showSinglePointMap(googleMap, start, drive);
+            return;
+        }
+
+        // configure map for normal route display
+        googleMap.getUiSettings().setAllGesturesEnabled(false);
+        googleMap.getUiSettings().setZoomControlsEnabled(false);
 
         // add incident markers if available
         if (drive.getIncidentDetails() != null) {
@@ -422,9 +435,49 @@ public class InsightsFragment extends Fragment {
         boundsBuilder.include(end);
         com.google.android.gms.maps.model.LatLngBounds bounds = boundsBuilder.build();
 
-        googleMap.moveCamera(com.google.android.gms.maps.CameraUpdateFactory.newLatLngBounds(bounds, 80));
+        googleMap.moveCamera(com.google.android.gms.maps.CameraUpdateFactory.newLatLngBounds(bounds, 50));
     }
 
+    private void showNoGpsPlaceholder(com.google.android.gms.maps.GoogleMap googleMap) {
+        googleMap.clear();
+        googleMap.getUiSettings().setAllGesturesEnabled(false);
+        googleMap.setMapType(com.google.android.gms.maps.GoogleMap.MAP_TYPE_NONE);
+
+        // Show centered text marker (won't be visible, but prevents errors)
+        com.google.android.gms.maps.model.LatLng center =
+                new com.google.android.gms.maps.model.LatLng(0, 0);
+        googleMap.moveCamera(com.google.android.gms.maps.CameraUpdateFactory.newLatLngZoom(center, 1));
+    }
+
+    private void showSinglePointMap(com.google.android.gms.maps.GoogleMap googleMap,
+                                    com.google.android.gms.maps.model.LatLng point,
+                                    DriveDataResponse drive) {
+        googleMap.clear();
+        googleMap.getUiSettings().setAllGesturesEnabled(false);
+        googleMap.getUiSettings().setZoomControlsEnabled(false);
+
+        // add incident markers if available
+        if (drive.getIncidentDetails() != null) {
+            // Hard braking - RED #F44336
+            addIncidentMarkers(googleMap, drive.getIncidentDetails().get("hard_braking"),
+                    android.graphics.Color.parseColor("#F44336"));
+
+            // Sharp turning - YELLOW #FFEB3B
+            addIncidentMarkers(googleMap, drive.getIncidentDetails().get("sharp_turning"),
+                    android.graphics.Color.parseColor("#FFEB3B"));
+
+            // Lane deviation - BLUE #2196F3
+            addIncidentMarkers(googleMap, drive.getIncidentDetails().get("lane_deviation"),
+                    android.graphics.Color.parseColor("#2196F3"));
+
+            // Inconsistent speed - ORANGE #FF9800
+            addIncidentMarkers(googleMap, drive.getIncidentDetails().get("inconsistent_speed"),
+                    android.graphics.Color.parseColor("#FF9800"));
+        }
+
+        // Zoom to street level to show incidents
+        googleMap.moveCamera(com.google.android.gms.maps.CameraUpdateFactory.newLatLngZoom(point, 16));
+    }
     private void addIncidentMarkers(com.google.android.gms.maps.GoogleMap googleMap,
                                     java.util.List<java.util.Map<String, Object>> incidents,
                                     int color) {
@@ -474,7 +527,7 @@ public class InsightsFragment extends Fragment {
     }
 
     private com.google.android.gms.maps.model.BitmapDescriptor createSmallMarkerIcon(int color) {
-        int size = 24;  // small marker size in pixels
+        int size = 40;  // small marker size in pixels
         android.graphics.Bitmap bitmap = android.graphics.Bitmap.createBitmap(size, size, android.graphics.Bitmap.Config.ARGB_8888);
         android.graphics.Canvas canvas = new android.graphics.Canvas(bitmap);
         android.graphics.Paint paint = new android.graphics.Paint();

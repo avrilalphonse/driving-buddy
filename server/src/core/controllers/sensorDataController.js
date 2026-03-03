@@ -223,7 +223,7 @@ export const getPersistentSummaryData = async (req, res) => {
                     sudden_braking: trip.hard_braking?.length || 0,
                     inconsistent_speed: trip.inconsistent_speed?.length || 0,
                     lane_deviation: trip.lane_deviation?.length || 0,
-                    sharp_turn: trip.sharp_turning?.length || 0
+                    sharp_turning: trip.sharp_turning?.length || 0
                 },
                 // Detailed incidents with location and timestamp
                 incident_details: {
@@ -255,9 +255,9 @@ export const getPersistentSummaryData = async (req, res) => {
             sudden_braking: driveData.reduce((sum, drive) => sum + drive.incidents.sudden_braking, 0),
             inconsistent_speed: driveData.reduce((sum, drive) => sum + drive.incidents.inconsistent_speed, 0),
             lane_deviation: driveData.reduce((sum, drive) => sum + drive.incidents.lane_deviation, 0),
-            sharp_turn: driveData.reduce((sum, drive) => sum + drive.incidents.sharp_turn, 0)
+            sharp_turn: driveData.reduce((sum, drive) => sum + drive.incidents.sharp_turning, 0)
         };
-        totals.total = totals.sudden_braking + totals.inconsistent_speed + totals.lane_deviation + totals.sharp_turn;
+        totals.total = totals.sudden_braking + totals.inconsistent_speed + totals.lane_deviation + totals.sharp_turning;
 
         res.json({
             drives: driveData,
