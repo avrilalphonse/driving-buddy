@@ -64,6 +64,7 @@ public class DataCollectionFragment extends Fragment {
                 "• <a href='https://docs.sentiance.com/drive/events-and-scores/'>Sentiance Driving Events and Scores (Sentiance Docs)</a><br>" +
                 "• <a href='https://arxiv.org/abs/1711.03938'>CARLA: An Open Urban Driving Simulator (arXiv)</a><br>" +
                 "• <a href='https://www.diva-portal.org/smash/record.jsf?pid=diva2%3A1210211&dswid=-3606'>Driver Behavior Classification (DiVA Portal)</a><br><br>" +
+                "Car model data shown in the app is sourced from <a href='https://www.carqueryapi.com/'>CarQuery API</a>.<br><br>" +
                 "We do not share raw driving data with third parties. These sources help us ensure our interpretations of driving events are based on sound, research-backed criteria.";
         citesText.setText(Html.fromHtml(htmlText, Html.FROM_HTML_MODE_LEGACY));
         citesText.setMovementMethod(LinkMovementMethod.getInstance());
