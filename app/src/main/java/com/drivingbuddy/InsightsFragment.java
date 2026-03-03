@@ -440,7 +440,9 @@ public class InsightsFragment extends Fragment {
                         new com.google.android.gms.maps.model.LatLng(lat, lon);
                 googleMap.addMarker(new com.google.android.gms.maps.model.MarkerOptions()
                         .position(location)
-                        .icon(com.google.android.gms.maps.model.BitmapDescriptorFactory.defaultMarker(color)));
+                        .icon(createSmallMarkerIcon(color))
+                        .anchor(0.5f, 0.5f)
+                        .flat(true));
             } catch (Exception e) {
                 Log.e("InsightsFragment", "Failed to parse incident location: " + e.getMessage());
             }
