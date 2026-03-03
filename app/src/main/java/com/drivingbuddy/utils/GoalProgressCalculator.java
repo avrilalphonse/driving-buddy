@@ -8,7 +8,7 @@ import java.util.Map;
 
 public final class GoalProgressCalculator {
     private static final int MIN_TOTAL_MINUTES = 30;
-    private static final double ROLLING_MINUTES = 30.0;
+    private static final double ROLLING_MINUTES = 90.0;
 
     private GoalProgressCalculator() {
     }
