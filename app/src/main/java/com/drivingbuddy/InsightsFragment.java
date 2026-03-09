@@ -592,6 +592,35 @@ public class InsightsFragment extends Fragment {
         generateChart(view, R.id.lineChart2, drive -> drive.sharpBraking, "Sudden Braking");
         generateChart(view, R.id.lineChart3, drive -> drive.sharpTurns, "Sharp Turns");
         generateChart(view, R.id.lineChart4, drive -> drive.inconsistentSpeeds, "Inconsistent Speeds");
+
+        // then unify y-axis scale across all charts
+        int globalMax = computeGlobalMaxCount();
+        float axisMax = Math.max(1f, globalMax); // avoid 0 max
+
+        setSharedYAxis(view.findViewById(R.id.lineChart1), axisMax);
+        setSharedYAxis(view.findViewById(R.id.lineChart2), axisMax);
+        setSharedYAxis(view.findViewById(R.id.lineChart3), axisMax);
+        setSharedYAxis(view.findViewById(R.id.lineChart4), axisMax);
+    }
+
+    private void setSharedYAxis(LineChart chart, float axisMax) {
+        if (chart == null) return;
+        chart.getAxisLeft().setAxisMinimum(0f);
+        chart.getAxisLeft().setAxisMaximum(axisMax);
+        chart.getAxisLeft().setGranularity(1f);
+        chart.invalidate();
+    }
+
+    private int computeGlobalMaxCount() {
+        int max = 0;
+        for (DriveData d : drives) {
+            if (d == null) continue;
+            max = Math.max(max, d.reducedLaneDeviation);
+            max = Math.max(max, d.sharpBraking);
+            max = Math.max(max, d.sharpTurns);
+            max = Math.max(max, d.inconsistentSpeeds);
+        }
+        return max;
     }
 
     private void generateChart(View parent, int chartId, Function<DriveData, Integer> extractor, String label) {
