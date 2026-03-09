@@ -316,6 +316,29 @@ public class InsightsFragment extends Fragment {
         });
     }
 
+
+    /**
+     * Waterloo-only heuristic:
+     * - latitude should be positive (~43)
+     * - longitude should be negative (~-80)
+     *
+     * If the pair looks like [lon, lat] (negative then positive), swap it to [lat, lon].
+     */
+    private double[] normalizeWaterlooLatLon(double first, double second) {
+        if (first < 0 && second > 0) {
+            // Looks like [lon, lat] -> swap to [lat, lon]
+            return new double[]{second, first};
+        }
+        // assume already [lat, lon]
+        return new double[]{first, second};
+    }
+
+    private com.google.android.gms.maps.model.LatLng waterlooLatLng(double first, double second) {
+        double[] fixed = normalizeWaterlooLatLon(first, second);
+        return new com.google.android.gms.maps.model.LatLng(fixed[0], fixed[1]);
+    }
+
+
     private void populateDriveCards(View view, LayoutInflater inflater) {
         LinearLayout container = view.findViewById(R.id.past_drives_container);
         container.removeAllViews();
@@ -385,14 +408,11 @@ public class InsightsFragment extends Fragment {
         }
 
         // extract coordinates (stored as [lat, lon])
-        com.google.android.gms.maps.model.LatLng start = new com.google.android.gms.maps.model.LatLng(
-                drive.getStartLocation()[0],  // latitude
-                drive.getStartLocation()[1]   // longitude
-        );
-        com.google.android.gms.maps.model.LatLng end = new com.google.android.gms.maps.model.LatLng(
-                drive.getEndLocation()[0],
-                drive.getEndLocation()[1]
-        );
+        com.google.android.gms.maps.model.LatLng start =
+                waterlooLatLng(drive.getStartLocation()[0], drive.getStartLocation()[1]);
+
+        com.google.android.gms.maps.model.LatLng end =
+                waterlooLatLng(drive.getEndLocation()[0], drive.getEndLocation()[1]);
 
         // Calculate distance between start and end (in degrees, roughly)
         double latDiff = Math.abs(start.latitude - end.latitude);
@@ -485,12 +505,18 @@ public class InsightsFragment extends Fragment {
 
         for (java.util.Map<String, Object> incident : incidents) {
             try {
-                // Handle both Double and String types
-                double lat = parseDouble(incident.get("latitude"));
-                double lon = parseDouble(incident.get("longitude"));
+                Object latObj = incident.get("latitude");
+                Object lonObj = incident.get("longitude");
+                if (latObj == null || lonObj == null) {
+                    continue; // skip this incident marker
+                }
 
-                com.google.android.gms.maps.model.LatLng location =
-                        new com.google.android.gms.maps.model.LatLng(lat, lon);
+                // Handle both Double and String types
+                double first = parseDouble(latObj);
+                double second = parseDouble(lonObj);
+
+                com.google.android.gms.maps.model.LatLng location = waterlooLatLng(first, second);
+
                 googleMap.addMarker(new com.google.android.gms.maps.model.MarkerOptions()
                         .position(location)
                         .icon(createSmallMarkerIcon(color))
